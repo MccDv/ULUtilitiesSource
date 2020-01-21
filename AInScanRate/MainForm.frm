@@ -1,187 +1,59 @@
 VERSION 5.00
-Begin VB.Form frmStatusDisplay 
-   Appearance      =   0  'Flat
-   BackColor       =   &H80000005&
-   Caption         =   "Scan Rate Test"
-   ClientHeight    =   7320
-   ClientLeft      =   2820
-   ClientTop       =   1920
-   ClientWidth     =   12135
-   BeginProperty Font 
-      Name            =   "MS Sans Serif"
-      Size            =   8.25
-      Charset         =   0
-      Weight          =   700
-      Underline       =   0   'False
-      Italic          =   0   'False
-      Strikethrough   =   0   'False
-   EndProperty
-   ForeColor       =   &H00FF0000&
-   LinkMode        =   1  'Source
+Begin VB.Form frmMain 
+   Caption         =   "Main Form"
+   ClientHeight    =   8790
+   ClientLeft      =   225
+   ClientTop       =   555
+   ClientWidth     =   12795
+   KeyPreview      =   -1  'True
    LinkTopic       =   "Form1"
-   PaletteMode     =   1  'UseZOrder
-   ScaleHeight     =   7320
-   ScaleWidth      =   12135
-   Begin VB.TextBox txtTimeout 
-      Height          =   285
-      Left            =   4500
-      TabIndex        =   49
-      Text            =   "5"
-      Top             =   2760
-      Width           =   735
-   End
-   Begin VB.CheckBox chkLoopTillActive 
-      BackColor       =   &H80000005&
-      Caption         =   "Loop status until active"
-      Height          =   255
-      Left            =   180
-      TabIndex        =   48
-      Top             =   2820
-      Value           =   1  'Checked
-      Width           =   2715
-   End
-   Begin VB.CommandButton cmdFlash 
+   ScaleHeight     =   8790
+   ScaleWidth      =   12795
+   StartUpPosition =   2  'CenterScreen
+   Begin VB.CommandButton cmdStartBgnd 
       Appearance      =   0  'Flat
-      Caption         =   "Flash LED"
+      Caption         =   "Start"
       Height          =   396
-      Left            =   5580
-      TabIndex        =   46
-      Top             =   6840
+      Left            =   120
+      TabIndex        =   53
+      Top             =   7800
+      Width           =   780
+   End
+   Begin VB.CommandButton cmdQuit 
+      Appearance      =   0  'Flat
+      Caption         =   "Quit"
+      Height          =   390
+      Left            =   10260
+      TabIndex        =   52
+      Top             =   7800
       Width           =   1260
    End
-   Begin VB.CheckBox chkDelay 
-      BackColor       =   &H80000005&
-      Caption         =   "Delay Restart"
-      Height          =   315
-      Left            =   960
-      TabIndex        =   45
-      Top             =   3900
-      Width           =   1635
-   End
-   Begin VB.TextBox txtDelay 
+   Begin VB.CommandButton cmdStop 
+      Appearance      =   0  'Flat
+      Caption         =   "Stop"
       Enabled         =   0   'False
-      Height          =   285
-      Left            =   180
-      TabIndex        =   44
-      Text            =   "100"
-      Top             =   3900
-      Width           =   675
+      Height          =   396
+      Left            =   1140
+      TabIndex        =   51
+      Top             =   7800
+      Width           =   780
    End
-   Begin VB.Timer tmrDelay 
-      Enabled         =   0   'False
-      Interval        =   100
-      Left            =   2640
-      Top             =   5940
-   End
-   Begin VB.Frame fraScanType 
-      BackColor       =   &H80000005&
-      Caption         =   "Scan Type"
-      Height          =   915
-      Left            =   120
-      TabIndex        =   39
-      Top             =   0
-      Width           =   5355
-      Begin VB.OptionButton optScanType 
-         BackColor       =   &H80000005&
-         Caption         =   "Counter Input"
-         Height          =   195
-         Index           =   4
-         Left            =   3660
-         TabIndex        =   47
-         Top             =   300
-         Width           =   1515
-      End
-      Begin VB.OptionButton optScanType 
-         BackColor       =   &H80000005&
-         Caption         =   "Digital Output"
-         Height          =   195
-         Index           =   3
-         Left            =   1980
-         TabIndex        =   43
-         Top             =   600
-         Width           =   1635
-      End
-      Begin VB.OptionButton optScanType 
-         BackColor       =   &H80000005&
-         Caption         =   "Digital Input"
-         Height          =   195
-         Index           =   2
-         Left            =   1980
-         TabIndex        =   42
-         Top             =   300
-         Width           =   1635
-      End
-      Begin VB.OptionButton optScanType 
-         BackColor       =   &H80000005&
-         Caption         =   "Analog Output"
-         Height          =   195
-         Index           =   1
-         Left            =   240
-         TabIndex        =   41
-         Top             =   600
-         Width           =   1635
-      End
-      Begin VB.OptionButton optScanType 
-         BackColor       =   &H80000005&
-         Caption         =   "Analog Input"
-         Height          =   195
-         Index           =   0
-         Left            =   240
-         TabIndex        =   40
-         Top             =   300
-         Value           =   -1  'True
-         Width           =   1635
-      End
-   End
-   Begin VB.TextBox txtHWVersion 
-      Height          =   285
-      Left            =   1980
-      TabIndex        =   35
-      Top             =   1500
-      Width           =   255
-   End
-   Begin VB.ComboBox cmbTestBoard 
-      Height          =   315
-      ItemData        =   "AInScanRate.frx":0000
-      Left            =   180
-      List            =   "AInScanRate.frx":0002
-      TabIndex        =   32
-      Text            =   "Combo1"
-      Top             =   1080
-      Width           =   1900
-   End
-   Begin VB.ComboBox cmbMeasBoard 
-      Height          =   315
-      Left            =   180
-      TabIndex        =   31
-      Text            =   "Combo1"
-      ToolTipText     =   "USB-CTR0x or HP34401"
-      Top             =   1980
-      Width           =   1900
-   End
-   Begin VB.TextBox txtFreqInterval 
-      Height          =   285
-      Left            =   2760
-      TabIndex        =   29
-      Text            =   "1"
-      Top             =   3900
-      Width           =   675
-   End
-   Begin VB.TextBox txtTmrInterval 
-      Height          =   285
-      Left            =   2760
-      TabIndex        =   27
-      Text            =   "100"
-      Top             =   3540
-      Width           =   675
+   Begin VB.CommandButton cmdClear 
+      Appearance      =   0  'Flat
+      Caption         =   "Clear"
+      Height          =   396
+      Left            =   3360
+      TabIndex        =   50
+      Top             =   7800
+      Width           =   780
    End
    Begin VB.CommandButton cmdSaveLog 
       Appearance      =   0  'Flat
       Caption         =   "Save Log"
       Height          =   396
-      Left            =   8700
-      TabIndex        =   24
-      Top             =   6840
+      Left            =   8580
+      TabIndex        =   49
+      Top             =   7800
       Width           =   1260
    End
    Begin VB.TextBox txtRateLog 
@@ -196,350 +68,455 @@ Begin VB.Form frmStatusDisplay
       EndProperty
       ForeColor       =   &H00FF0000&
       Height          =   6375
-      Left            =   5580
+      Left            =   5880
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
-      TabIndex        =   17
-      Top             =   60
+      TabIndex        =   48
+      Top             =   720
       Width           =   6435
-   End
-   Begin VB.TextBox txtNumSamples 
-      Height          =   285
-      Left            =   4500
-      TabIndex        =   15
-      Text            =   "5"
-      Top             =   2340
-      Width           =   735
-   End
-   Begin VB.CommandButton cmdClear 
-      Appearance      =   0  'Flat
-      Caption         =   "Clear"
-      Height          =   396
-      Left            =   3480
-      TabIndex        =   14
-      Top             =   6840
-      Width           =   780
-   End
-   Begin VB.CommandButton cmdStop 
-      Appearance      =   0  'Flat
-      Caption         =   "Stop"
-      Enabled         =   0   'False
-      Height          =   396
-      Left            =   1260
-      TabIndex        =   12
-      Top             =   6840
-      Width           =   780
-   End
-   Begin VB.TextBox txtRate 
-      Height          =   285
-      Left            =   180
-      TabIndex        =   11
-      Text            =   "10000"
-      ToolTipText     =   "300k max using HP34401"
-      Top             =   3540
-      Width           =   975
-   End
-   Begin VB.TextBox txtIterations 
-      Height          =   285
-      Left            =   180
-      TabIndex        =   10
-      Text            =   "100"
-      Top             =   3180
-      Width           =   975
-   End
-   Begin VB.TextBox txtHighChan 
-      Appearance      =   0  'Flat
-      Height          =   225
-      Left            =   4500
-      TabIndex        =   9
-      Text            =   "0"
-      Top             =   1980
-      Width           =   495
-   End
-   Begin VB.CommandButton cmdQuit 
-      Appearance      =   0  'Flat
-      Caption         =   "Quit"
-      Height          =   390
-      Left            =   10380
-      TabIndex        =   1
-      Top             =   6840
-      Width           =   1260
    End
    Begin VB.Timer tmrCheckStatus 
       Enabled         =   0   'False
       Interval        =   500
-      Left            =   2100
-      Top             =   5940
+      Left            =   4020
+      Top             =   5820
    End
-   Begin VB.CommandButton cmdStartBgnd 
-      Appearance      =   0  'Flat
-      Caption         =   "Start"
-      Height          =   396
-      Left            =   240
-      TabIndex        =   0
-      Top             =   6840
-      Width           =   780
+   Begin VB.Timer tmrDelay 
+      Enabled         =   0   'False
+      Interval        =   100
+      Left            =   4560
+      Top             =   5820
    End
-   Begin VB.Label lblTimeout 
-      Alignment       =   1  'Right Justify
-      BackColor       =   &H80000005&
-      Caption         =   "Timeout"
-      Height          =   195
-      Left            =   3480
-      TabIndex        =   50
-      Top             =   2820
-      Width           =   915
+   Begin VB.TextBox txtRate 
+      Height          =   285
+      Left            =   180
+      TabIndex        =   32
+      Text            =   "10000"
+      ToolTipText     =   "300k max using HP34401"
+      Top             =   4680
+      Width           =   975
    End
-   Begin VB.Label lblFirmwareVersion 
-      Alignment       =   1  'Right Justify
-      Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
-      ForeColor       =   &H00FF0000&
-      Height          =   195
-      Left            =   2700
-      TabIndex        =   38
-      Top             =   1500
+   Begin VB.TextBox txtTmrInterval 
+      Height          =   285
+      Left            =   2760
+      TabIndex        =   31
+      Text            =   "100"
+      Top             =   4680
+      Width           =   675
+   End
+   Begin VB.TextBox txtFreqInterval 
+      Height          =   285
+      Left            =   2760
+      TabIndex        =   30
+      Text            =   "1"
+      Top             =   5040
+      Width           =   675
+   End
+   Begin VB.TextBox txtDelay 
+      Enabled         =   0   'False
+      Height          =   285
+      Left            =   180
+      TabIndex        =   29
+      Text            =   "100"
+      Top             =   5040
+      Width           =   675
+   End
+   Begin VB.CheckBox chkDelay 
+      Caption         =   "Delay Restart"
+      Height          =   315
+      Left            =   960
+      TabIndex        =   28
+      Top             =   5040
+      Width           =   1635
+   End
+   Begin VB.TextBox txtIterations 
+      Height          =   285
+      Left            =   180
+      TabIndex        =   25
+      Text            =   "100"
+      Top             =   4260
+      Width           =   975
+   End
+   Begin VB.CheckBox chkLoopTillActive 
+      Caption         =   "Loop status until active"
+      Height          =   255
+      Left            =   180
+      TabIndex        =   24
+      Top             =   3780
+      Value           =   1  'Checked
       Width           =   2715
    End
-   Begin VB.Label lblUniqueID 
-      Alignment       =   1  'Right Justify
+   Begin VB.TextBox txtHighChan 
       Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
-      ForeColor       =   &H00FF0000&
-      Height          =   195
-      Left            =   3540
-      TabIndex        =   37
-      Top             =   1140
-      Width           =   1875
+      Height          =   285
+      Left            =   4680
+      TabIndex        =   20
+      Text            =   "0"
+      Top             =   2940
+      Width           =   495
    End
-   Begin VB.Label lblHWVersion 
-      Alignment       =   1  'Right Justify
-      Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
-      Caption         =   "HW ver (A, B, etc)"
-      ForeColor       =   &H80000008&
-      Height          =   195
+   Begin VB.TextBox txtNumSamples 
+      Height          =   285
+      Left            =   4680
+      TabIndex        =   19
+      Text            =   "5"
+      Top             =   3360
+      Width           =   735
+   End
+   Begin VB.TextBox txtTimeout 
+      Height          =   285
+      Left            =   4680
+      TabIndex        =   18
+      Text            =   "5"
+      Top             =   3780
+      Width           =   735
+   End
+   Begin VB.ComboBox cmbMeasBoard 
+      Height          =   315
       Left            =   120
-      TabIndex        =   36
-      Top             =   1560
-      Width           =   1755
+      TabIndex        =   16
+      Text            =   "Combo1"
+      ToolTipText     =   "USB-CTR0x or HP34401"
+      Top             =   2580
+      Width           =   1900
    End
-   Begin VB.Label lblCurIteration 
+   Begin VB.TextBox txtHWVersion 
+      Alignment       =   2  'Center
+      Height          =   285
+      Left            =   4920
+      TabIndex        =   13
+      Text            =   "A"
+      Top             =   1800
+      Width           =   255
+   End
+   Begin VB.Frame fraScanType 
+      Caption         =   "Scan Type"
+      Height          =   915
+      Left            =   120
+      TabIndex        =   5
+      Top             =   660
+      Width           =   5355
+      Begin VB.OptionButton optScanType 
+         Caption         =   "Analog Input"
+         Height          =   195
+         Index           =   0
+         Left            =   240
+         TabIndex        =   10
+         Top             =   300
+         Value           =   -1  'True
+         Width           =   1635
+      End
+      Begin VB.OptionButton optScanType 
+         Caption         =   "Analog Output"
+         Height          =   195
+         Index           =   1
+         Left            =   240
+         TabIndex        =   9
+         Top             =   600
+         Width           =   1635
+      End
+      Begin VB.OptionButton optScanType 
+         Caption         =   "Digital Input"
+         Height          =   195
+         Index           =   2
+         Left            =   1980
+         TabIndex        =   8
+         Top             =   300
+         Width           =   1635
+      End
+      Begin VB.OptionButton optScanType 
+         Caption         =   "Digital Output"
+         Height          =   195
+         Index           =   3
+         Left            =   1980
+         TabIndex        =   7
+         Top             =   600
+         Width           =   1635
+      End
+      Begin VB.OptionButton optScanType 
+         Caption         =   "Counter Input"
+         Height          =   195
+         Index           =   4
+         Left            =   3660
+         TabIndex        =   6
+         Top             =   300
+         Width           =   1515
+      End
+   End
+   Begin VB.Frame fraBoard 
+      Height          =   615
+      Left            =   120
+      TabIndex        =   1
+      Top             =   0
+      Width           =   7575
+      Begin VB.CommandButton cmdFlashLED 
+         Caption         =   "FlashLED"
+         Height          =   315
+         Left            =   6360
+         TabIndex        =   4
+         Top             =   180
+         Width           =   1035
+      End
+      Begin VB.ComboBox cmbBoard 
+         Height          =   315
+         Left            =   180
+         TabIndex        =   2
+         ToolTipText     =   "F5 to update, Ctl-F5 for Ethernet, Shift-Ctl-F5 for remote Ethernet"
+         Top             =   180
+         Width           =   3075
+      End
+      Begin VB.Label lblBoardNumber 
+         ForeColor       =   &H00FF0000&
+         Height          =   195
+         Left            =   3420
+         TabIndex        =   3
+         Top             =   240
+         Width           =   2715
+      End
+   End
+   Begin VB.Label lblMaxDiff 
       Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
-      ForeColor       =   &H00FF0000&
-      Height          =   210
-      Left            =   2820
-      TabIndex        =   34
-      Top             =   3240
-      Width           =   1500
-   End
-   Begin VB.Label lblNumSamples 
-      Alignment       =   1  'Right Justify
-      BackColor       =   &H80000005&
-      Caption         =   "Samples"
-      Height          =   195
-      Left            =   3480
-      TabIndex        =   33
-      Top             =   2400
-      Width           =   915
-   End
-   Begin VB.Label lblFreqInterval 
-      BackColor       =   &H80000005&
-      Caption         =   "Freq Interval"
-      Height          =   195
-      Left            =   3540
-      TabIndex        =   30
-      Top             =   3960
-      Width           =   1335
-   End
-   Begin VB.Label lblTmrInterval 
-      BackColor       =   &H80000005&
-      Caption         =   "Timer Interval"
-      Height          =   195
-      Left            =   3540
-      TabIndex        =   28
-      Top             =   3600
-      Width           =   1335
-   End
-   Begin VB.Label lblIterations 
-      BackColor       =   &H80000005&
-      Caption         =   "Iterations"
-      Height          =   195
-      Left            =   1260
-      TabIndex        =   26
-      Top             =   3240
-      Width           =   1095
-   End
-   Begin VB.Label lblStartFreq 
-      BackColor       =   &H80000005&
-      Caption         =   "Starting Freq"
-      Height          =   195
-      Left            =   1260
-      TabIndex        =   25
-      Top             =   3600
-      Width           =   1395
-   End
-   Begin VB.Label lblMaxDiffMeas 
-      Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
       ForeColor       =   &H00FF0000&
       Height          =   210
       Left            =   180
-      TabIndex        =   23
-      Top             =   6480
+      TabIndex        =   47
+      Top             =   7140
       Width           =   4650
    End
-   Begin VB.Label lblMeasBoard 
-      BackColor       =   &H80000005&
-      Caption         =   "Measure Board"
-      Height          =   375
-      Left            =   2160
-      TabIndex        =   22
-      Top             =   1980
-      Width           =   855
-      WordWrap        =   -1  'True
+   Begin VB.Label lblMaxDiffMeas 
+      Appearance      =   0  'Flat
+      ForeColor       =   &H00FF0000&
+      Height          =   210
+      Left            =   180
+      TabIndex        =   46
+      Top             =   7440
+      Width           =   4650
+   End
+   Begin VB.Label lblReqVsRet 
+      Alignment       =   1  'Right Justify
+      Appearance      =   0  'Flat
+      Caption         =   "Difference Requested vs Returned:"
+      ForeColor       =   &H80000008&
+      Height          =   210
+      Left            =   180
+      TabIndex        =   45
+      Top             =   6600
+      Width           =   3540
+   End
+   Begin VB.Label lblShowReqVsRet 
+      Appearance      =   0  'Flat
+      ForeColor       =   &H00FF0000&
+      Height          =   210
+      Left            =   3870
+      TabIndex        =   44
+      Top             =   6600
+      Width           =   990
+   End
+   Begin VB.Label lblShowDiffAvM 
+      Appearance      =   0  'Flat
+      ForeColor       =   &H00FF0000&
+      Height          =   210
+      Left            =   3840
+      TabIndex        =   43
+      Top             =   6900
+      Width           =   990
    End
    Begin VB.Label lblDiffRetVsMeas 
       Alignment       =   1  'Right Justify
       Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
       Caption         =   "Difference Returned vs Measured:"
       ForeColor       =   &H80000008&
       Height          =   210
-      Left            =   180
-      TabIndex        =   21
-      Top             =   5760
+      Left            =   210
+      TabIndex        =   42
+      Top             =   6900
       Width           =   3540
    End
-   Begin VB.Label lblShowDiffAvM 
-      Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
-      ForeColor       =   &H00FF0000&
-      Height          =   210
-      Left            =   3810
-      TabIndex        =   20
-      Top             =   5760
-      Width           =   990
-   End
-   Begin VB.Label lblMeasRate 
+   Begin VB.Label lblReqRate 
       Alignment       =   1  'Right Justify
       Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
-      Caption         =   "Measured Rate:"
+      Caption         =   "Requested Rate:"
       ForeColor       =   &H80000008&
       Height          =   210
-      Left            =   180
-      TabIndex        =   19
-      Top             =   4920
+      Left            =   660
+      TabIndex        =   41
+      Top             =   5700
       Width           =   1545
    End
-   Begin VB.Label lblShowMeasRate 
+   Begin VB.Label lblShowReqRate 
       Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
       ForeColor       =   &H00FF0000&
       Height          =   210
-      Left            =   1905
-      TabIndex        =   18
-      Top             =   4920
-      Width           =   1500
-   End
-   Begin VB.Label lblBoardNum 
-      BackColor       =   &H80000005&
-      Caption         =   "Test Board"
-      Height          =   195
-      Left            =   2160
-      TabIndex        =   16
-      Top             =   1140
-      Width           =   1155
-   End
-   Begin VB.Label lblMaxDiff 
-      Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
-      ForeColor       =   &H00FF0000&
-      Height          =   210
-      Left            =   180
-      TabIndex        =   13
-      Top             =   6180
-      Width           =   4650
-   End
-   Begin VB.Label lblMeas 
-      Alignment       =   1  'Right Justify
-      Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
-      Caption         =   "Scan 0 to"
-      ForeColor       =   &H80000008&
-      Height          =   195
-      Left            =   3360
-      TabIndex        =   8
-      Top             =   1980
-      Width           =   1035
-   End
-   Begin VB.Label lblShowCount 
-      Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
-      ForeColor       =   &H00FF0000&
-      Height          =   210
-      Left            =   1890
-      TabIndex        =   7
-      Top             =   4650
+      Left            =   2385
+      TabIndex        =   40
+      Top             =   5700
       Width           =   1500
    End
    Begin VB.Label lblReturnedRate 
       Alignment       =   1  'Right Justify
       Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
       Caption         =   "Rate Returned:"
       ForeColor       =   &H80000008&
       Height          =   210
-      Left            =   165
-      TabIndex        =   5
-      Top             =   4650
+      Left            =   660
+      TabIndex        =   39
+      Top             =   5985
       Width           =   1545
    End
-   Begin VB.Label lblShowReqRate 
+   Begin VB.Label lblShowCount 
       Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
       ForeColor       =   &H00FF0000&
       Height          =   210
-      Left            =   1890
-      TabIndex        =   6
-      Top             =   4365
+      Left            =   2385
+      TabIndex        =   38
+      Top             =   5985
       Width           =   1500
    End
-   Begin VB.Label lblReqRate 
-      Alignment       =   1  'Right Justify
+   Begin VB.Label lblShowMeasRate 
       Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
-      Caption         =   "Requested Rate:"
-      ForeColor       =   &H80000008&
-      Height          =   210
-      Left            =   165
-      TabIndex        =   4
-      Top             =   4365
-      Width           =   1545
-   End
-   Begin VB.Label lblShowReqVsRet 
-      Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
       ForeColor       =   &H00FF0000&
       Height          =   210
-      Left            =   3840
-      TabIndex        =   3
-      Top             =   5460
-      Width           =   990
+      Left            =   2400
+      TabIndex        =   37
+      Top             =   6255
+      Width           =   1500
    End
-   Begin VB.Label lblReqVsRet 
+   Begin VB.Label lblMeasRate 
       Alignment       =   1  'Right Justify
       Appearance      =   0  'Flat
-      BackColor       =   &H80000005&
-      Caption         =   "Difference Requested vs Returned:"
+      Caption         =   "Measured Rate:"
       ForeColor       =   &H80000008&
       Height          =   210
-      Left            =   150
-      TabIndex        =   2
-      Top             =   5460
-      Width           =   3540
+      Left            =   675
+      TabIndex        =   36
+      Top             =   6255
+      Width           =   1545
+   End
+   Begin VB.Label lblStartFreq 
+      Caption         =   "Starting Freq"
+      Height          =   195
+      Left            =   1260
+      TabIndex        =   35
+      Top             =   4740
+      Width           =   1395
+   End
+   Begin VB.Label lblTmrInterval 
+      Caption         =   "Timer Interval"
+      Height          =   195
+      Left            =   3540
+      TabIndex        =   34
+      Top             =   4740
+      Width           =   1335
+   End
+   Begin VB.Label lblFreqInterval 
+      Caption         =   "Freq Interval"
+      Height          =   195
+      Left            =   3540
+      TabIndex        =   33
+      Top             =   5100
+      Width           =   1335
+   End
+   Begin VB.Label lblIterations 
+      Caption         =   "Iterations"
+      Height          =   195
+      Left            =   1260
+      TabIndex        =   27
+      Top             =   4320
+      Width           =   1095
+   End
+   Begin VB.Label lblCurIteration 
+      Appearance      =   0  'Flat
+      ForeColor       =   &H00FF0000&
+      Height          =   210
+      Left            =   2820
+      TabIndex        =   26
+      Top             =   4320
+      Width           =   1500
+   End
+   Begin VB.Label lblMeas 
+      Alignment       =   1  'Right Justify
+      Appearance      =   0  'Flat
+      Caption         =   "Scan 0 to"
+      ForeColor       =   &H80000008&
+      Height          =   195
+      Left            =   3540
+      TabIndex        =   23
+      Top             =   2940
+      Width           =   1035
+   End
+   Begin VB.Label lblNumSamples 
+      Alignment       =   1  'Right Justify
+      Caption         =   "Samples"
+      Height          =   195
+      Left            =   3660
+      TabIndex        =   22
+      Top             =   3420
+      Width           =   915
+   End
+   Begin VB.Label lblTimeout 
+      Alignment       =   1  'Right Justify
+      Caption         =   "Timeout"
+      Height          =   195
+      Left            =   3660
+      TabIndex        =   21
+      Top             =   3840
+      Width           =   915
+   End
+   Begin VB.Label lblMeasBoard 
+      Caption         =   "Measure Board"
+      Height          =   195
+      Left            =   2100
+      TabIndex        =   17
+      Top             =   2640
+      Width           =   1455
+      WordWrap        =   -1  'True
+   End
+   Begin VB.Label lblHWVersion 
+      Alignment       =   1  'Right Justify
+      Appearance      =   0  'Flat
+      Caption         =   "HW ver (A, B, etc)"
+      ForeColor       =   &H80000008&
+      Height          =   195
+      Left            =   3240
+      TabIndex        =   15
+      Top             =   1860
+      Width           =   1575
+   End
+   Begin VB.Label lblFirmwareVersion 
+      Appearance      =   0  'Flat
+      ForeColor       =   &H00FF0000&
+      Height          =   195
+      Left            =   1200
+      TabIndex        =   14
+      Top             =   2160
+      Width           =   1875
+   End
+   Begin VB.Label lblBoardNum 
+      Caption         =   "Test Board"
+      Height          =   195
+      Left            =   120
+      TabIndex        =   12
+      Top             =   1860
+      Width           =   975
+   End
+   Begin VB.Label lblUniqueID 
+      Appearance      =   0  'Flat
+      ForeColor       =   &H00FF0000&
+      Height          =   195
+      Left            =   1200
+      TabIndex        =   11
+      Top             =   1860
+      Width           =   1875
+   End
+   Begin VB.Label lblStatus 
+      BorderStyle     =   1  'Fixed Single
+      Caption         =   "Label1"
+      ForeColor       =   &H00FF0000&
+      Height          =   255
+      Left            =   360
+      TabIndex        =   0
+      Top             =   8520
+      Width           =   6915
    End
    Begin VB.Menu nmuHelp 
       Caption         =   "Help"
@@ -555,13 +532,11 @@ Begin VB.Form frmStatusDisplay
       End
    End
 End
-Attribute VB_Name = "frmStatusDisplay"
+Attribute VB_Name = "frmMain"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Option Explicit
-
 Const BIFWVERSION = 170
 Const BIMFGSERIALNUM = 224
 
@@ -601,6 +576,120 @@ Dim mlMemHandle As Long        ' define a variable to contain the handle for
 Dim ULStat As Long
 Dim mbDelayRestart As Boolean
 
+
+Private Sub cmbBoard_Click()
+
+   If cmbBoard.ListCount > 0 Then
+      BoardIndex% = cmbBoard.ListIndex
+      mlBoardNum = gnBoardEnum(BoardIndex%)
+      ULStat = cbGetConfig(BOARDINFO, mlBoardNum, 0, BIBOARDTYPE, ConfigVal&)
+      pID$ = Hex(ConfigVal&)
+      Filler& = 4 - Len(pID$)
+      If Filler& > 0 Then Prefix$ = String(Filler&, Chr(48))
+      lblBoardNumber.Caption = "Board Number " & _
+         mlBoardNum & " (type 0x" & Prefix$ & pID$ & ")"
+      GetDeviceInfo
+   Else
+      lblBoardNumber.Caption = "No Boards Installed"
+   End If
+   
+End Sub
+
+Private Sub cmdFlashLED_Click()
+
+   cmdFlashLED.Enabled = False
+   ULStat = cbFlashLED(mlBoardNum)
+   x% = SaveFunc(Me, FlashLED, ULStat, _
+      mlBoardNum, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, 0)
+   cmdFlashLED.Enabled = True
+   
+End Sub
+
+Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
+
+   If KeyCode = vbKeyF5 Then
+      If (Shift And vbCtrlMask) Then
+         If (Shift And vbShiftMask) = vbShiftMask Then
+            frmRemoteNetDlg.Show 1, Me
+            If Not (frmRemoteNetDlg.txtHostName.Text = "") Then
+               HostName = frmRemoteNetDlg.txtHostName.Text
+               HostPort& = Val(frmRemoteNetDlg.txtHostPort.Text)
+               Timeout& = Val(frmRemoteNetDlg.txtTimeout.Text)
+               DevsFound& = UpdateDevices(True, HostName, HostPort&, Timeout&)
+            End If
+            Unload frmRemoteNetDlg
+         Else
+            DevsFound& = UpdateDevices(True)
+         End If
+      Else
+         DevsFound& = UpdateDevices(False)
+      End If
+   End If
+   
+End Sub
+
+Private Sub Form_Load()
+   
+   Dim ULStat As Long, AddsFound As Integer
+   Dim ReportError As Long, HandleError As Long
+   Dim DevsFound As Long
+   Dim BoardName As String, StatString As String
+   
+   ' declare revision level of Universal Library
+
+   ULStat = cbDeclareRevision(CURRENTREVNUM)
+
+   ReportError = DONTPRINT
+   HandleError = DONTSTOP
+   ULStat = cbErrHandling(ReportError, HandleError)
+   If ULStat <> 0 Then ShowErrorDlg ULStat
+   
+   PopulateBoards
+   DevsFound = UpdateDevices(False)
+
+End Sub
+
+Private Function UpdateDevices(ByVal CheckNet As Boolean, _
+   Optional HostString As Variant, Optional HostPort As Long, _
+   Optional Timeout As Long) As Long
+
+   Dim devInterface As DaqDeviceInterface
+   Dim DevsInstalled As Long
+   
+   devInterface = USB_IFC + BLUETOOTH_IFC
+   If CheckNet Then devInterface = _
+      USB_IFC + BLUETOOTH_IFC + ETHERNET_IFC
+   DevsInstalled = GetNumInstacalDevs()
+   If IsMissing(HostString) Then
+      DevsFound& = DiscoverDevices(devInterface, True)
+   Else
+      DevsFound& = DiscoverDevices(devInterface, _
+         True, HostString, HostPort, Timeout)
+   End If
+
+   cmbBoard.Clear
+   For i% = 0 To gnNumBoards - 1
+      BoardNum% = gnBoardEnum(i%)
+      BoardName$ = GetNameOfBoard(BoardNum%)
+      cmbBoard.AddItem BoardName$, i%
+   Next i%
+   If cmbBoard.ListCount > 0 Then cmbBoard.ListIndex = 0
+   
+End Function
+
+Private Sub Form_Resize()
+
+   If Me.Width < 6795 Then Me.Width = 6795
+   lblStatus.Width = Me.Width
+   lblStatus.Left = 0
+   lblStatus.Top = (Me.ScaleHeight - 280)
+   fraBoard.Left = 0
+   fraBoard.Width = Me.Width
+   fraBoard.Top = -80
+   
+End Sub
+
+
 Private Sub chkDelay_Click()
 
    txtDelay.Enabled = (chkDelay.value = 1)
@@ -624,12 +713,12 @@ Private Sub cmbMeasBoard_Click()
    
 End Sub
 
-Private Sub cmbTestBoard_Click()
+'Private Sub cmbTestBoard_Click()
 
-   mlBoardNum = cmbTestBoard.ItemData(cmbTestBoard.ListIndex)
-   GetDeviceInfo
+'   mlBoardNum = cmbTestBoard.ItemData(cmbTestBoard.ListIndex)
+'   GetDeviceInfo
 
-End Sub
+'End Sub
 
 Private Sub cmdClear_Click()
 
@@ -662,13 +751,6 @@ Private Sub cmdHelp_Click()
       txtRateLog.Text = txtRateLog.Text & Values(Node) & vbCrLf
    Next
 
-End Sub
-
-Private Sub cmdFlash_Click()
-
-   ULStat = cbFlashLED(mlBoardNum)
-   If ULStat <> 0 Then ShowErrorDlg ULStat
-   
 End Sub
 
 Private Sub cmdSaveLog_Click()
@@ -704,7 +786,7 @@ Private Sub cmdSaveLog_Click()
       Case DOFUNCTION
          ScanType = "DOutScanRate"
    End Select
-   TestBoard = cmbTestBoard.Text
+   TestBoard = cmbBoard.Text
    TestBoard = Replace(TestBoard, "/", "_")
    frmFileDialog.txtFileName.Text = ScanType & _
       TestBoard & HWVersion & ".txt"
@@ -713,7 +795,7 @@ Private Sub cmdSaveLog_Click()
    If Not filename = "" Then
       Path = frmFileDialog.Dir1.Path & "\" & frmFileDialog.txtFileName.Text
       Open Path For Output As #1
-      Print #1, cmbTestBoard.Text & " Rate Test"
+      Print #1, cmbBoard.Text & " Rate Test"
       Print #1, "Firmware version " & FWVersion & "  Serial number " & SerNum & vbCrLf
       Print #1, nlIterations & " measurements made at " & mlFreqInterval & _
          "Hz intervals between " & nlRate & "Hz and " & lblShowReqRate.Caption & "Hz."
@@ -740,26 +822,8 @@ Private Sub cmdStop_Click()
    Me.cmdStartBgnd.Enabled = True
    Me.cmdQuit.Enabled = True
    cmdStop.Enabled = False
+   lblStatus.ForeColor = &HFF0000
    
-End Sub
-
-Private Sub Form_Load()
-   
-   Dim ULStat As Long, AddsFound As Integer
-   Dim ReportError As Long, HandleError As Long
-   Dim BoardName As String, StatString As String
-   
-   ' declare revision level of Universal Library
-
-   ULStat = cbDeclareRevision(CURRENTREVNUM)
-
-   ReportError = DONTPRINT
-   HandleError = DONTSTOP
-   ULStat = cbErrHandling(ReportError, HandleError)
-   If ULStat <> 0 Then ShowErrorDlg ULStat
-   
-   PopulateBoards
-
 End Sub
 
 Private Sub cmdStartBgnd_Click()
@@ -820,6 +884,10 @@ Private Sub cmdStartBgnd_Click()
             Exit Sub
          End If
       End If
+   Else
+      lblStatus.ForeColor = &HFF
+      lblStatus.Caption = "This test requires a source (Measure Board)"
+      Exit Sub
    End If
    mlFreqInterval = Val(txtFreqInterval.Text)
    nlIterations = Val(txtIterations.Text)
@@ -1187,7 +1255,7 @@ Private Sub PopulateBoards()
    Dim PromptText As String
    
    'mlBoardNum = 0
-   cmbTestBoard.Clear
+   'cmbTestBoard.Clear
    cmbMeasBoard.Clear
    cmbMeasBoard.AddItem "None"
    cmbMeasBoard.ItemData(cmbMeasBoard.NewIndex) = -2
@@ -1216,10 +1284,10 @@ Private Sub PopulateBoards()
                mlFuncType = CTRFUNCTION
                AddBoard = CheckForCounter(BoardNum)
          End Select
-         If AddBoard Then
-            cmbTestBoard.AddItem BoardName
-            cmbTestBoard.ItemData(cmbTestBoard.NewIndex) = BoardNum
-         End If
+         'If AddBoard Then
+         '   cmbTestBoard.AddItem BoardName
+         '   cmbTestBoard.ItemData(cmbTestBoard.NewIndex) = BoardNum
+         'End If
       End If
    Next
 
@@ -1256,7 +1324,7 @@ Private Sub PopulateBoards()
          End If
       Next
    End If
-   If cmbTestBoard.ListCount > 0 Then cmbTestBoard.ListIndex = 0
+   'If cmbTestBoard.ListCount > 0 Then cmbTestBoard.ListIndex = 0
    If cmbMeasBoard.ListCount > 0 Then _
       cmbMeasBoard.ListIndex = cmbMeasBoard.ListCount - 1
    SetColor = mlColorDisabled
@@ -1344,3 +1412,5 @@ Private Function LoadData() As Long
    LoadData = ULStat&
    
 End Function
+
+
