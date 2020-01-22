@@ -644,8 +644,8 @@ Private Sub Form_Load()
    ULStat = cbErrHandling(ReportError, HandleError)
    If ULStat <> 0 Then ShowErrorDlg ULStat
    
-   PopulateBoards
    DevsFound = UpdateDevices(False)
+   PopulateBoards
 
 End Sub
 
@@ -1249,6 +1249,7 @@ End Sub
 Private Sub PopulateBoards()
 
    Dim BoardNum As Long, AddsFound As Integer
+   Dim BoardIndex As Long
    Dim BoardName As String, MeasureBoard As Boolean
    Dim SetColor As Long, AddBoard As Boolean
    Dim result As VbMsgBoxResult
@@ -1259,7 +1260,8 @@ Private Sub PopulateBoards()
    cmbMeasBoard.Clear
    cmbMeasBoard.AddItem "None"
    cmbMeasBoard.ItemData(cmbMeasBoard.NewIndex) = -2
-   For BoardNum = 0 To 30
+   For BoardIndex = 0 To gnNumBoards - 1
+      BoardNum = gnBoardEnum(BoardIndex)
       BoardName = GetDevName(BoardNum)
       If Not BoardName = "" Then
          MeasureBoard = ((BoardName = "USB-CTR08") _
@@ -1270,24 +1272,6 @@ Private Sub PopulateBoards()
             mbMeasBoardExists = True
             MeasureBoard = False
          End If
-         Select Case True
-            Case Me.optScanType(0).value
-               mlFuncType = AIFUNCTION
-               AddBoard = CheckForAnalog(BoardNum)
-            Case optScanType(2).value
-               mlFuncType = DIFUNCTION
-               AddBoard = CheckForDigital(BoardNum)
-            Case optScanType(3).value
-               mlFuncType = DOFUNCTION
-               AddBoard = CheckForDigital(BoardNum)
-            Case Me.optScanType(4).value
-               mlFuncType = CTRFUNCTION
-               AddBoard = CheckForCounter(BoardNum)
-         End Select
-         'If AddBoard Then
-         '   cmbTestBoard.AddItem BoardName
-         '   cmbTestBoard.ItemData(cmbTestBoard.NewIndex) = BoardNum
-         'End If
       End If
    Next
 
@@ -1340,6 +1324,7 @@ Private Sub GetDeviceInfo()
    Dim ConfigVal As String, CurItem As String
    Dim Version As Single, ConfigLen As Long
    Dim DevNum As Long, VersionString As String
+   Dim AddBoard As Boolean
    
    ConfigLen = 64
    DevNum = 0
@@ -1364,6 +1349,21 @@ Private Sub GetDeviceInfo()
    Next
    VersionString$ = Left(VersionString$, (Len(VersionString$) - 2))
    lblFirmwareVersion.Caption = VersionString$
+   
+   Select Case True
+      Case Me.optScanType(0).value
+         mlFuncType = AIFUNCTION
+         AddBoard = CheckForAnalog(mlBoardNum)
+      Case optScanType(2).value
+         mlFuncType = DIFUNCTION
+         AddBoard = CheckForDigital(mlBoardNum)
+      Case optScanType(3).value
+         mlFuncType = DOFUNCTION
+         AddBoard = CheckForDigital(mlBoardNum)
+      Case Me.optScanType(4).value
+         mlFuncType = CTRFUNCTION
+         AddBoard = CheckForCounter(mlBoardNum)
+   End Select
    
 End Sub
 
