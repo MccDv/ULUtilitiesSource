@@ -745,11 +745,11 @@ Private Sub cmdHelp_Click()
    Dim Values As Variant
    Dim Node As Long
 
-   RegNode = "Software\Measurement Computing"
-   NumNodesFound = FindSubNodes(HKEY_LOCAL_MACHINE, RegNode, Values)
-   For Node = 0 To NumNodesFound
-      txtRateLog.Text = txtRateLog.Text & Values(Node) & vbCrLf
-   Next
+   'RegNode = "Software\Measurement Computing"
+   'NumNodesFound = FindSubNodes(HKEY_LOCAL_MACHINE, RegNode, Values)
+   'For Node = 0 To NumNodesFound
+   '   txtRateLog.Text = txtRateLog.Text & Values(Node) & vbCrLf
+   'Next
 
 End Sub
 
