@@ -9,12 +9,12 @@ Begin VB.Form frmMain
    LinkTopic       =   "Form1"
    ScaleHeight     =   3435
    ScaleWidth      =   7800
-   StartUpPosition =   3  'Windows Default
+   StartUpPosition =   2  'CenterScreen
    Begin VB.TextBox txtRateEstimate 
       Height          =   285
       Left            =   1800
       TabIndex        =   9
-      Text            =   "3000"
+      Text            =   "300"
       Top             =   2160
       Width           =   1335
    End
@@ -30,9 +30,9 @@ Begin VB.Form frmMain
    Begin VB.CheckBox chkArray 
       Caption         =   "Use DOutArray"
       Height          =   255
-      Left            =   2340
+      Left            =   4680
       TabIndex        =   7
-      Top             =   1260
+      Top             =   1680
       Width           =   2055
    End
    Begin VB.TextBox txtPortIndex 
@@ -47,7 +47,7 @@ Begin VB.Form frmMain
       Height          =   615
       Left            =   120
       TabIndex        =   1
-      Top             =   120
+      Top             =   0
       Width           =   7575
       Begin VB.CommandButton cmdFlashLED 
          Caption         =   "FlashLED"
@@ -74,6 +74,22 @@ Begin VB.Form frmMain
          Width           =   2715
       End
    End
+   Begin VB.Label lblResult 
+      ForeColor       =   &H00FF0000&
+      Height          =   195
+      Left            =   4920
+      TabIndex        =   13
+      Top             =   2220
+      Width           =   2055
+   End
+   Begin VB.Label lblPortsAvailable 
+      ForeColor       =   &H00FF0000&
+      Height          =   195
+      Left            =   300
+      TabIndex        =   12
+      Top             =   780
+      Width           =   3015
+   End
    Begin VB.Label lblRateEstimate 
       Caption         =   "Rate Estimate"
       Height          =   195
@@ -85,9 +101,9 @@ Begin VB.Form frmMain
    Begin VB.Label lblPortType 
       ForeColor       =   &H00FF0000&
       Height          =   195
-      Left            =   4680
+      Left            =   2460
       TabIndex        =   10
-      Top             =   1320
+      Top             =   1260
       Width           =   2835
    End
    Begin VB.Label lblPortIndex 
@@ -115,22 +131,36 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Dim mlBoardNum As Long, mlNumBits As Long
+Dim mlNumPorts As Long
 Dim mlPortNum As Long, mlNumArrayPorts As Long
 
 Private Sub cmbBoard_Click()
 
+   Dim AddBoard As Boolean
+   Dim previousBoard As Long
+   
+   previousBoard = mlBoardNum
+   If mlNumPorts > 0 Then ConfigureOutputs False
    If cmbBoard.ListCount > 0 Then
       BoardIndex% = cmbBoard.ListIndex
       mlBoardNum = gnBoardEnum(BoardIndex%)
-      ULStat = cbGetConfig(BOARDINFO, mlBoardNum, 0, BIBOARDTYPE, ConfigVal&)
-      pID$ = Hex(ConfigVal&)
+      ULStat = cbGetConfig(BOARDINFO, mlBoardNum, 0, BIBOARDTYPE, configVal&)
+      pID$ = Hex(configVal&)
       Filler& = 4 - Len(pID$)
       If Filler& > 0 Then Prefix$ = String(Filler&, Chr(48))
       lblBoardNumber.Caption = "Board Number " & _
          mlBoardNum & " (type 0x" & Prefix$ & pID$ & ")"
-      cmdStart.Enabled = True
+      AddBoard = CheckForDigital(mlBoardNum)
+      lblPortsAvailable.Caption = "Number of ports available: " & mlNumPorts
    Else
       lblBoardNumber.Caption = "No Boards Installed"
+      AddBoard = False
+   End If
+   Me.lblPortType.Caption = ""
+   If AddBoard Then
+      Me.cmdStart.Enabled = True
+      GetPortType 0
+      If mlNumPorts > 0 Then ConfigureOutputs True
    End If
    
 End Sub
@@ -197,15 +227,21 @@ Private Function UpdateDevices(ByVal CheckNet As Boolean, _
    End If
 
    cmbBoard.Clear
-   For I% = 0 To gnNumBoards - 1
-      BoardNum% = gnBoardEnum(I%)
+   For i% = 0 To gnNumBoards - 1
+      BoardNum% = gnBoardEnum(i%)
       BoardName$ = GetNameOfBoard(BoardNum%)
-      cmbBoard.AddItem BoardName$, I%
-   Next I%
+      cmbBoard.AddItem BoardName$, i%
+   Next i%
    If cmbBoard.ListCount > 0 Then cmbBoard.ListIndex = 0
    UpdateDevices = gnNumBoards
    
 End Function
+
+Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
+
+   If mlNumPorts > 0 Then ConfigureOutputs False
+   
+End Sub
 
 Private Sub Form_Resize()
 
@@ -229,8 +265,8 @@ Private Sub chkArray_Click()
    txtPortIndex.Enabled = (chkArray.Value = 0)
    If PortEnabled Then
       ULStat& = cbGetConfig(BOARDINFO, mlBoardNum, _
-         0, BIDINUMDEVS, ConfigVal&)
-      For DevNum& = 0 To ConfigVal& - 1
+         0, BIDINUMDEVS, configVal&)
+      For DevNum& = 0 To configVal& - 1
          ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
             DevNum&, DIDEVTYPE, DevType&)
          ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
@@ -274,9 +310,9 @@ Private Sub cmdStart_Click()
    Dim OutArrayHigh(1) As Long
    
    Me.cmdStart.Enabled = False
-   Iterations& = Val(txtRateEstimate.Text) * 5
+   Iterations& = Val(txtRateEstimate.Text)
    
-   ULStat& = cbDConfigPort(mlBoardNum, mlPortNum, 1)
+   ULStat& = cbDConfigPort(mlBoardNum, mlPortNum, DIGITALOUT)
    If Me.chkArray.Value = 1 Then
       OutArrayLow(0) = 0
       OutArrayLow(1) = 0
@@ -290,7 +326,8 @@ Private Sub cmdStart_Click()
       Next
       ULStat& = cbDOutArray(mlBoardNum, mlPortNum, _
          LastArrayPort&, OutArrayLow(0))
-      For I& = 0 To Iterations&
+      StartTime! = Timer
+      For i& = 0 To Iterations&
          ULStat& = cbDOutArray(mlBoardNum, mlPortNum, _
             LastArrayPort&, OutArrayHigh(0))
          ULStat& = cbDOutArray(mlBoardNum, mlPortNum, _
@@ -300,27 +337,35 @@ Private Sub cmdStart_Click()
       DataVal% = 0
       
       ULStat& = cbDOut(mlBoardNum, mlPortNum, DataVal%)
-      
-      For I& = 0 To Iterations&
+      StartTime! = Timer
+      For i& = 0 To Iterations&
          ULStat& = cbDOut(mlBoardNum, mlPortNum, 255)
          ULStat& = cbDOut(mlBoardNum, mlPortNum, 0)
       Next
    End If
+   elapsedTime! = Timer - StartTime!
    Me.cmdStart.Enabled = True
+   outputRate! = 1 / (elapsedTime! / Iterations&)
+   FormatString$ = "0.00 Hz"
+   divisor! = 1#
+   If outputRate! > 999 Then
+      FormatString$ = "0.00 kHz"
+      divisor! = 1000#
+   End If
+   Me.lblResult.Caption = Format(outputRate! / divisor!, FormatString$)
    
 End Sub
 
 Private Sub GetPortType(ByVal PortIndex As Long)
 
    ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
-   PortIndex, DIDEVTYPE, DevType&)
+      PortIndex, DIDEVTYPE, DevType&)
    If Not ULStat& = 0 Then
       Me.lblPortType.Caption = "Invalid Port"
       cmdStart.Enabled = False
    Else
       mlPortNum = DevType&
-      Me.lblPortType.Caption = "Port Type " & _
-      Format(mlPortNum, "0")
+      Me.lblPortType.Caption = GetPortString(mlPortNum)
       cmdStart.Enabled = True
    End If
    
@@ -333,3 +378,42 @@ Private Sub txtPortIndex_Change()
    
 End Sub
 
+Private Function CheckForDigital(ByVal BoardNum As Long) As Boolean
+   
+   Dim ValidBoard As Boolean
+   Dim ReportError As Long, HandleError As Long
+   Dim DefaultPort As Long, DefaultNumBits As Long
+   Dim FirstBit As Long
+   ReportError = DONTPRINT
+   HandleError = DONTSTOP
+   
+   ValidBoard = False
+   SetDigitalIODefaults ReportError, HandleError
+   Dim ChannelType As Long
+   ChannelType = PORTOUT
+   NumDIChans = FindPortsOfType(BoardNum, ChannelType, _
+      PROGPORT, DefaultPort, DefaultNumBits, FirstBit)
+   mlNumPorts = NumDIChans
+   If Not (NumDIChans = 0) Then
+      ValidBoard = True
+      mlPortNum = DefaultPort
+      mnResolution = DefaultNumBits
+   End If
+   CheckForDigital = ValidBoard
+   cmdStart.Enabled = ValidBoard
+
+End Function
+
+Private Sub ConfigureOutputs(SetOutputs As Boolean)
+
+   Dim Direction As Long, PortNum As Long
+   
+   Direction = DIGITALIN
+   If SetOutputs Then Direction = DIGITALOUT
+   For i% = 0 To mlNumPorts - 1
+      ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
+         i%, DIDEVTYPE, PortNum)
+      ULStat& = cbDConfigPort(mlBoardNum, PortNum, Direction)
+   Next
+   
+End Sub

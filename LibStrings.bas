@@ -1292,8 +1292,9 @@ Function GetChannelTypeString(ChannelType As Long) As String
    
 End Function
 
-Function GetPortString(ByVal PortNum As Long) As String
+Function GetPortStringEx(ByVal PortNum As Long) As String
 
+   'GetPortString conflicts with Digital module - renamed
    Select Case PortNum
       Case AUXPORT
          Reply$ = "AUXPORT"
@@ -1370,7 +1371,7 @@ Function GetPortString(ByVal PortNum As Long) As String
       Case Else
          Reply$ = "INVALIDPORT"
    End Select
-   GetPortString = Reply$
+   GetPortStringEx = Reply$
    
 End Function
 

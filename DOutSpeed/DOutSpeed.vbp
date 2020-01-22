@@ -8,6 +8,7 @@ Module=Utility; ..\Utilities.bas
 Module=SYSINF32; ..\Versinf32.bas
 Form=..\Template\frmRemoteNetDlg.frm
 Module=TemplateDefs; ..\Template\TemplateDefs.bas
+Module=DigitalIO; ..\..\DAQ\VBWIN\Sample32\Digital.bas
 IconForm="frmMain"
 Startup="frmMain"
 HelpFile=""
