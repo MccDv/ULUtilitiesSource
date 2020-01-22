@@ -1,6 +1,6 @@
 VERSION 5.00
 Begin VB.Form frmMain 
-   Caption         =   "Main Form"
+   Caption         =   "Scan Rate Test"
    ClientHeight    =   8790
    ClientLeft      =   225
    ClientTop       =   555
