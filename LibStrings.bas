@@ -1546,9 +1546,9 @@ Function GetPolarityString(Polarity As Long) As String
 
 End Function
 
-Function Get8254ConfigString(ConfigVal As Long) As String
+Function Get8254ConfigString(configVal As Long) As String
 
-   Select Case ConfigVal
+   Select Case configVal
       Case HIGHONLASTCOUNT
          Reply$ = "HIGHONLASTCOUNT"
       Case ONESHOT
@@ -2124,3 +2124,16 @@ Public Function GetAiChanModeString(ByVal ChanMode As Integer) As String
 
 End Function
 
+Function GetULError(ErrCode As Long) As String
+
+   Dim ErrMessage As String
+   Dim ErrStat As Long
+   Dim StatString As String
+
+   ErrMessage$ = Space$(ERRSTRLEN)
+   ErrStat = cbGetErrMsg(ErrCode, ErrMessage)
+   ErrMessage$ = RTrim$(ErrMessage$)   'Drop the space characters
+   ErrMessage$ = Left$(ErrMessage$, Len(ErrMessage$) - 1)
+   GetULError = ErrMessage$
+
+End Function
