@@ -378,7 +378,7 @@ Private Sub cmdStart_Click()
       FormatString$ = "0.00 kHz"
       divisor! = 1000#
    End If
-   txtResult.Text = Format(inputRate! / divisor!, FormatString$)
+   txtResult.Text = "Update rate: " & Format(inputRate! / divisor!, FormatString$)
    
 End Sub
 
