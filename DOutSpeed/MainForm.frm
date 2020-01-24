@@ -221,6 +221,7 @@ Private Sub cmbBoard_Click()
       GetPortType
       If mlNumPorts > 0 Then ConfigureOutputs True
    End If
+   txtResult.Text = ""
    
 End Sub
 
@@ -325,6 +326,7 @@ Private Sub cmdStart_Click()
    LastBit = Val(txtLastBit.Text) + Offset&
    NumBits = (LastBit - FirstBit) + 1
    Me.cmdStart.Enabled = False
+   txtResult.Text = ""
    Iterations& = Val(txtRateEstimate.Text)
    
    If Me.chkArray.Value = 1 Then
@@ -507,6 +509,8 @@ Private Function CheckForDigital(ByVal BoardNum As Long) As Boolean
       ValidBoard = True
       mlPortNum = DefaultPort
       mnResolution = DefaultNumBits
+   Else
+      txtResult.Text = ""
    End If
    CheckForDigital = ValidBoard
    cmdStart.Enabled = ValidBoard

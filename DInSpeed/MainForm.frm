@@ -203,8 +203,8 @@ Private Sub cmbBoard_Click()
    If cmbBoard.ListCount > 0 Then
       BoardIndex% = cmbBoard.ListIndex
       mlBoardNum = gnBoardEnum(BoardIndex%)
-      ULStat = cbGetConfig(BOARDINFO, mlBoardNum, 0, BIBOARDTYPE, configVal&)
-      pID$ = Hex(configVal&)
+      ULStat = cbGetConfig(BOARDINFO, mlBoardNum, 0, BIBOARDTYPE, ConfigVal&)
+      pID$ = Hex(ConfigVal&)
       Filler& = 4 - Len(pID$)
       If Filler& > 0 Then Prefix$ = String(Filler&, Chr(48))
       lblBoardNumber.Caption = "Board Number " & _
@@ -220,6 +220,7 @@ Private Sub cmbBoard_Click()
       Me.cmdStart.Enabled = True
       GetPortType
    End If
+   txtResult.Text = ""
    
 End Sub
 
@@ -318,6 +319,7 @@ Private Sub cmdStart_Click()
    LastBit = Val(txtLastBit.Text) + Offset&
    NumBits = (LastBit - FirstBit) + 1
    Me.cmdStart.Enabled = False
+   txtResult.Text = ""
    Iterations& = Val(txtRateEstimate.Text)
    
    If Me.chkArray.Value = 1 Then
@@ -356,6 +358,12 @@ Private Sub cmdStart_Click()
       Else
          DataVal% = 0
          ULStat& = cbDIn(mlBoardNum, mlPortNum, DataVal%)
+         If ULStat& <> 0 Then
+            ErrMessage$ = GetULError(ULStat&)
+            txtResult.Text = ErrMessage$
+            Exit Sub
+         End If
+         StartTime! = Timer
          For i& = 1 To Iterations&
             ULStat& = cbDIn(mlBoardNum, mlPortNum, DataVal%)
          Next
@@ -384,8 +392,8 @@ Private Sub GetPortType()
    ArrayEnabled = Not (chkArray.Value = 0)
    If ArrayEnabled Then
       ULStat& = cbGetConfig(BOARDINFO, mlBoardNum, _
-         0, BIDINUMDEVS, configVal&)
-      For DevNum& = mlPortIndex To configVal& - 1
+         0, BIDINUMDEVS, ConfigVal&)
+      For DevNum& = mlPortIndex To ConfigVal& - 1
          ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
             DevNum&, DIDEVTYPE, DevType&)
          ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
@@ -484,6 +492,8 @@ Private Function CheckForDigital(ByVal BoardNum As Long) As Boolean
       ValidBoard = True
       mlPortNum = DefaultPort
       mnResolution = DefaultNumBits
+   Else
+      txtResult.Text = ""
    End If
    CheckForDigital = ValidBoard
    cmdStart.Enabled = ValidBoard
