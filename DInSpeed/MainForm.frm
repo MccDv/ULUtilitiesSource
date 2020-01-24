@@ -426,13 +426,11 @@ Private Sub GetPortType()
       End If
       
       ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
-         PortIndex, DINUMBITS, NumBits&)
+         mlPortIndex, DINUMBITS, NumBits&)
       CurLast& = Val(txtLastBit.Text)
       OverBit = Not (CurLast& < NumBits&)
-      If (CurLast& < 0) Or OverBit Then
-         mlLastBit = NumBits& - 1
-         txtLastBit.Text = Format(mlLastBit, "0")
-      End If
+      mlLastBit = NumBits& - 1
+      txtLastBit.Text = Format(mlLastBit, "0")
       CurFirst& = Val(txtFirstBit.Text)
       If (CurFirst& > mlLastBit) Then
          mlFirstBit = 0
