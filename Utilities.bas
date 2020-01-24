@@ -85,3 +85,28 @@ Public Sub QuickSortVariants(vArray As Variant, inLow As Long, inHi As Long)
   
 End Sub
 
+Function GetBitOffset(PortNum As Long) As Long
+
+   Select Case PortNum
+      Case 0, 10
+         Offset& = 0
+      Case Is > 10
+         Offset& = 8
+         For CurPort& = 11 To PortNum - 1
+            Select Case CurPort&
+               Case 12, 13, 16, 17, 20, 21, 24, 25
+                  Offset& = Offset& + 4
+               Case 11, 14, 15, 18, 19, 22, 23, 26, 27
+                  Offset& = Offset& + 8
+               Case 28, 29, 32, 33, 36, 37, 40, 41
+                  Offset& = Offset& + 4
+               Case 30, 31, 34, 35, 38, 39
+                  Offset& = Offset& + 8
+            End Select
+         Next
+   End Select
+   GetBitOffset = Offset&
+   
+End Function
+
+

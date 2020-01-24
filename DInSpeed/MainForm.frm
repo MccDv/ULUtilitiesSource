@@ -311,12 +311,12 @@ End Sub
 Private Sub cmdStart_Click()
 
    Dim FirstBit As Long, LastBit As Long
-   Dim numBits As Long
+   Dim NumBits As Long
    
-   Offset& = GetBitOffset()
+   Offset& = GetBitOffset(mlPortNum)
    FirstBit = Val(txtFirstBit.Text) + Offset&
    LastBit = Val(txtLastBit.Text) + Offset&
-   numBits = (LastBit - FirstBit) + 1
+   NumBits = (LastBit - FirstBit) + 1
    Me.cmdStart.Enabled = False
    Iterations& = Val(txtRateEstimate.Text)
    
@@ -337,14 +337,22 @@ Private Sub cmdStart_Click()
       Next
       elapsedTime! = Timer - StartTime!
    Else
-      StartTime! = Timer
       If mbDoBits Then
+         BitPort& = FIRSTPORTA
+         If mlPortNum < 10 Then BitPort& = AUXPORT
+         ULStat& = cbDBitIn(mlBoardNum, BitPort&, FirstBit, BitVal%)
+         If ULStat& <> 0 Then
+            ErrMessage$ = GetULError(ULStat&)
+            txtResult.Text = ErrMessage$
+            Exit Sub
+         End If
+         StartTime! = Timer
          For i& = 1 To Iterations&
             For CurBit& = FirstBit To LastBit
-               ULStat& = cbDBitIn(mlBoardNum, PortNum&, CurBit&, BitVal%)
+               ULStat& = cbDBitIn(mlBoardNum, BitPort&, CurBit&, BitVal%)
             Next
          Next
-         elapsedTime! = (Timer - StartTime!) / numBits
+         elapsedTime! = (Timer - StartTime!) / NumBits
       Else
          DataVal% = 0
          ULStat& = cbDIn(mlBoardNum, mlPortNum, DataVal%)
@@ -366,30 +374,6 @@ Private Sub cmdStart_Click()
    
 End Sub
 
-Function GetBitOffset() As Long
-
-   Select Case mlPortNum
-      Case 0, 10
-         Offset& = 0
-      Case Is > 10
-         Offset& = 8
-         For CurPort& = 12 To mlPortNum
-            Select Case CurPort&
-               Case 12, 13, 16, 17, 20, 21, 24, 25
-                  Offset& = Offset& + 4
-               Case 14, 15, 18, 19, 22, 23, 26, 27
-                  Offset& = Offset& + 8
-               Case 28, 29, 32, 33, 36, 37, 40, 41
-                  Offset& = Offset& + 4
-               Case 30, 31, 34, 35, 38, 39
-                  Offset& = Offset& + 8
-            End Select
-         Next
-   End Select
-   GetBitOffset = Offset&
-   
-End Function
-
 Private Sub GetPortType()
 
    Dim OverBit As Boolean
@@ -405,17 +389,17 @@ Private Sub GetPortType()
          ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
             DevNum&, DIDEVTYPE, DevType&)
          ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
-            DevNum&, DINUMBITS, numBits&)
+            DevNum&, DINUMBITS, NumBits&)
          If PrevDevType& > 0 Then
             mlNumArrayPorts = mlNumArrayPorts + 1
-            If Not (mlNumBits = numBits&) Then
+            If Not (mlNumBits = NumBits&) Then
                mlNumArrayPorts = 1
                Exit For
             End If
             sPortList = sPortList & ", " & GetPortString(DevType&)
          Else
             mlNumArrayPorts = 1
-            mlNumBits = numBits&
+            mlNumBits = NumBits&
             PrevDevType& = DevType&
             sPortList = GetPortString(DevType&)
          End If
@@ -434,11 +418,11 @@ Private Sub GetPortType()
       End If
       
       ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
-         PortIndex, DINUMBITS, numBits&)
+         PortIndex, DINUMBITS, NumBits&)
       CurLast& = Val(txtLastBit.Text)
-      OverBit = Not (CurLast& < numBits&)
+      OverBit = Not (CurLast& < NumBits&)
       If (CurLast& < 0) Or OverBit Then
-         mlLastBit = numBits& - 1
+         mlLastBit = NumBits& - 1
          txtLastBit.Text = Format(mlLastBit, "0")
       End If
       CurFirst& = Val(txtFirstBit.Text)
@@ -466,6 +450,12 @@ End Sub
 Private Sub optPort_Click(Index As Integer)
 
    mbDoBits = optPort(1).Value
+   If mbDoBits Then
+      chkArray.Value = 0
+      chkArray.Visible = False
+   Else
+      chkArray.Visible = True
+   End If
    txtFirstBit.Visible = mbDoBits
    txtLastBit.Visible = mbDoBits
    lblFirstBit.Visible = mbDoBits
