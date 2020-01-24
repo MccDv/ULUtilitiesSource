@@ -193,7 +193,8 @@ Dim mlBoardNum As Long, mlNumBits As Long
 Dim mlFirstBit As Long, mlLastBit As Long
 Dim mlNumPorts As Long, mlPortIndex As Long
 Dim mlPortNum As Long, mlNumArrayPorts As Long
-Dim mbDoBits As Boolean
+Dim mbDoBits As Boolean, mlTotalBits As Long
+Dim msPortList As String
 
 Private Sub cmbBoard_Click()
 
@@ -203,8 +204,8 @@ Private Sub cmbBoard_Click()
    If cmbBoard.ListCount > 0 Then
       BoardIndex% = cmbBoard.ListIndex
       mlBoardNum = gnBoardEnum(BoardIndex%)
-      ULStat = cbGetConfig(BOARDINFO, mlBoardNum, 0, BIBOARDTYPE, configVal&)
-      pID$ = Hex(configVal&)
+      ULStat = cbGetConfig(BOARDINFO, mlBoardNum, 0, BIBOARDTYPE, ConfigVal&)
+      pID$ = Hex(ConfigVal&)
       Filler& = 4 - Len(pID$)
       If Filler& > 0 Then Prefix$ = String(Filler&, Chr(48))
       lblBoardNumber.Caption = "Board Number " & _
@@ -318,13 +319,9 @@ End Sub
 
 Private Sub cmdStart_Click()
 
-   Dim FirstBit As Long, LastBit As Long
    Dim NumBits As Long
    
-   Offset& = GetBitOffset(mlPortNum)
-   FirstBit = Val(txtFirstBit.Text) + Offset&
-   LastBit = Val(txtLastBit.Text) + Offset&
-   NumBits = (LastBit - FirstBit) + 1
+   NumBits = (mlLastBit - mlFirstBit) + 1
    Me.cmdStart.Enabled = False
    txtResult.Text = ""
    Iterations& = Val(txtRateEstimate.Text)
@@ -356,7 +353,7 @@ Private Sub cmdStart_Click()
       If mbDoBits Then
          BitPort& = FIRSTPORTA
          If mlPortNum < 10 Then BitPort& = AUXPORT
-         ULStat& = cbDBitOut(mlBoardNum, BitPort&, FirstBit, 0)
+         ULStat& = cbDBitOut(mlBoardNum, BitPort&, mlFirstBit, 0)
          If ULStat& <> 0 Then
             ErrMessage$ = GetULError(ULStat&)
             txtResult.Text = ErrMessage$
@@ -364,10 +361,10 @@ Private Sub cmdStart_Click()
          End If
          StartTime! = Timer
          For i& = 0 To Iterations&
-            For CurBit& = FirstBit To LastBit
+            For CurBit& = mlFirstBit To mlLastBit
                ULStat& = cbDBitOut(mlBoardNum, BitPort&, CurBit&, 1)
             Next
-            For CurBit& = FirstBit To LastBit
+            For CurBit& = mlFirstBit To mlLastBit
                ULStat& = cbDBitOut(mlBoardNum, BitPort&, CurBit&, 0)
             Next
          Next
@@ -408,20 +405,26 @@ Private Sub GetPortType()
    
    ArrayEnabled = Not (chkArray.Value = 0)
    If ArrayEnabled Then
+      mlTotalBits = 0
       ULStat& = cbGetConfig(BOARDINFO, mlBoardNum, _
-         0, BIDINUMDEVS, configVal&)
-      For DevNum& = mlPortIndex To configVal& - 1
+         0, BIDINUMDEVS, ConfigVal&)
+      For DevNum& = mlPortIndex To ConfigVal& - 1
          ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
             DevNum&, DIDEVTYPE, DevType&)
          ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
             DevNum&, DINUMBITS, NumBits&)
+         mlTotalBits = mlTotalBits + NumBits&
          If PrevDevType& > 0 Then
             mlNumArrayPorts = mlNumArrayPorts + 1
             If Not (mlNumBits = NumBits&) Then
                mlNumArrayPorts = 1
                Exit For
             End If
-            sPortList = sPortList & ", " & GetPortString(DevType&)
+            If Not mbDoBits Then
+               sPortList = sPortList & ", " & GetPortString(DevType&)
+            Else
+               Me.txtLastBit.Text = mlTotalBits - 1
+            End If
          Else
             mlNumArrayPorts = 1
             mlNumBits = NumBits&
@@ -429,16 +432,16 @@ Private Sub GetPortType()
             sPortList = GetPortString(DevType&)
          End If
       Next
-      Me.lblPortType.Caption = sPortList
+      msPortList = sPortList
    Else
       ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
          mlPortIndex, DIDEVTYPE, DevType&)
       If Not ULStat& = 0 Then
-         Me.lblPortType.Caption = "Invalid Port"
+         msPortList = "Invalid Port"
          cmdStart.Enabled = False
       Else
          mlPortNum = DevType&
-         Me.lblPortType.Caption = GetPortString(mlPortNum)
+         msPortList = GetPortString(mlPortNum)
          cmdStart.Enabled = True
       End If
    
@@ -454,6 +457,15 @@ Private Sub GetPortType()
          txtFirstBit.Text = "0"
       End If
    End If
+   
+   Offset& = GetBitOffset(mlBoardNum, mlPortIndex)
+   mlFirstBit = Val(txtFirstBit.Text) + Offset&
+   mlLastBit = Val(txtLastBit.Text) + Offset&
+   BitList$ = ""
+   If mbDoBits Then
+      BitList$ = " (Bit " & mlFirstBit & " to " & mlLastBit & ")"
+   End If
+   lblPortType.Caption = msPortList & BitList$
    
 End Sub
 
@@ -474,10 +486,9 @@ Private Sub optPort_Click(Index As Integer)
 
    mbDoBits = optPort(1).Value
    If mbDoBits Then
-      chkArray.Value = 0
-      chkArray.Visible = False
+      chkArray.Caption = "Span ports"
    Else
-      chkArray.Visible = True
+      chkArray.Caption = "Use DOutArray"
    End If
    txtFirstBit.Visible = mbDoBits
    txtLastBit.Visible = mbDoBits
