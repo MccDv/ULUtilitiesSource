@@ -927,7 +927,7 @@ Function GetOptionsString(OptionVal As Long, FormType As Integer, Optional FormF
             "SCALEDATA", "SINGLEIO", "DMAIO", "BLOCKIO", "WORDXFER", "SIMULTANEOUS")
          End If
          If Not IsNull(opt) Then
-            If FormType = COUNTER Then
+            If FormType = Counter Then
                If opt = "WORDXFER" Then opt = "CTR32BIT"
                If opt = "NOFILTER" Then opt = "CTR64BIT"
                If opt = "SIMULTANEOUS" Then opt = "CTR48BIT"
@@ -948,7 +948,7 @@ Function GetOptionsString(OptionVal As Long, FormType As Integer, Optional FormF
          "WAITFORNEWDATA", "EXTTRIGGER", "NOCALIBRATEDATA", "BURSTIO", "RETRIGMODE", _
          "NONSTREAMEDIO", "ADCCLOCKTRIG", "ADCCLOCK", "HIGHRESRATE", "SHUNTCAL")
          If Not IsNull(opt) Then
-            If FormType = COUNTER Then
+            If FormType = Counter Then
                If opt = "NOFILTER" Then opt = "CTR64BIT"
                If opt = "EXTMEMORY" Then opt = "NOCLEAR"
             Else 'If Not (FormType = ANALOG_IO) Then
@@ -1546,9 +1546,9 @@ Function GetPolarityString(Polarity As Long) As String
 
 End Function
 
-Function Get8254ConfigString(configVal As Long) As String
+Function Get8254ConfigString(ConfigVal As Long) As String
 
-   Select Case configVal
+   Select Case ConfigVal
       Case HIGHONLASTCOUNT
          Reply$ = "HIGHONLASTCOUNT"
       Case ONESHOT
@@ -1996,7 +1996,7 @@ Function GetParamString(FunctionID As Long, ParamNum As Long, ParamVal As Long) 
                Reply$ = GetOptionsString(ParamVal, ANALOG_IN)
          End Select
       Case DConfigPort To DOutScan    '22 - 28
-         Reply$ = GetPortString(ParamVal)
+         Reply$ = GetPortStringEx(ParamVal)
       Case SetTrigger   '49
          Reply$ = GetTrigTypeString(ParamVal)
       Case EnableEvent  '71
