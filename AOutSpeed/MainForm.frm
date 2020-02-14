@@ -171,6 +171,7 @@ Dim mlLastChan As Long
 Dim mnResolution As Integer, mlIteration As Long
 Dim mnDataValLow As Integer, mnDataValHigh As Integer
 Dim blEvenIteration As Boolean
+Dim msStartTime As Single
 
 Private Sub cmbBoard_Click()
 
@@ -337,11 +338,10 @@ Private Sub cmdStart_Click()
       For i& = 0 To Iterations&
          For Chan = mlFirstChan To mlLastChan
             ULStat& = cbAOut(mlBoardNum, Chan, mlRange, mnDataValHigh)
-            DoEvents
          Next
+         'Do: d& = d& + 1: DoEvents: Loop While d& < 20000
          For Chan = mlFirstChan To mlLastChan
             ULStat& = cbAOut(mlBoardNum, Chan, mlRange, mnDataValLow)
-            DoEvents
          Next
       Next
       elapsedTime! = (Timer - StartTime!) / (2 * NumChans)
@@ -380,6 +380,7 @@ Private Sub tmrAOut_Timer()
    DataVal% = mnDataValLow
    If blEvenIteration Then DataVal% = mnDataValHigh
    
+   If mlIteration = 0 Then msStartTime = Timer
    For Chan = mlFirstChan To mlLastChan
       ULStat& = cbAOut(mlBoardNum, Chan, mlRange, DataVal%)
    Next
@@ -387,8 +388,18 @@ Private Sub tmrAOut_Timer()
    txtResult.Text = mlIteration
    mlIteration = mlIteration + 1
    If mlIteration > endIteration Then
+      NumChans = (mlLastChan - mlFirstChan) + 1
+      elapsedTime! = (Timer - msStartTime) / (2 * NumChans)
       tmrAOut.Enabled = False
       cmdStart.Enabled = True
+      outputRate! = 1 / (elapsedTime! / endIteration)
+      FormatString$ = "0.00 Hz"
+      divisor! = 1#
+      If outputRate! > 999 Then
+         FormatString$ = "0.00 kHz"
+         divisor! = 1000#
+      End If
+      txtResult.Text = "Update rate: " & Format(outputRate! / divisor!, FormatString$)
    End If
 
 End Sub
