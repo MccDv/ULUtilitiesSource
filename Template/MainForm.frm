@@ -128,6 +128,7 @@ Private Function UpdateDevices(ByVal CheckNet As Boolean, _
    If IsMissing(HostString) Then
       DevsFound& = DiscoverDevices(devInterface, True)
    Else
+      If HostString = "" Then Exit Function
       DevsFound& = DiscoverDevices(devInterface, _
          True, HostString, HostPort, Timeout)
    End If

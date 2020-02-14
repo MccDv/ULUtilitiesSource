@@ -107,4 +107,16 @@ Function GetBitOffset(BoardNum As Long, PortIndex As Long) As Long
    
 End Function
 
+Function ULongValToInt(LongVal As Long) As Integer
+
+   Select Case LongVal
+      Case Is > 65535
+         ULongValToInt = -1
+      Case Is < 0
+         ULongValToInt = 0
+      Case Else
+         ULongValToInt = (LongVal - 32768) Xor &H8000
+   End Select
+
+End Function
 
