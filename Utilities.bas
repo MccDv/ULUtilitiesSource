@@ -1,4 +1,22 @@
 Attribute VB_Name = "Utility"
+Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
+
+Public Sub Pause(mSecsDelay As Single)
+   
+   Dim TimeOut   As Single
+   Dim PrevTimer As Single
+   
+   PrevTimer = Timer
+   TimeOut = PrevTimer + mSecsDelay
+   Do While PrevTimer < TimeOut
+      Sleep 4 '-- Timer is only updated every 1/64 sec = 15.625 millisecs.
+      DoEvents
+      If Timer < PrevTimer Then TimeOut = TimeOut - 86400 '-- pass midnight
+      PrevTimer = Timer
+   Loop
+
+End Sub
+
 Public Function ConvStringToInt(ByRef NumericString As String) As Integer
 
    If Len(NumericString) > 2 Then

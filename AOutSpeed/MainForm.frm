@@ -10,6 +10,23 @@ Begin VB.Form frmMain
    ScaleHeight     =   3480
    ScaleWidth      =   8205
    StartUpPosition =   2  'CenterScreen
+   Begin VB.CheckBox chkUseDelay 
+      Caption         =   "Use Delay"
+      Height          =   255
+      Left            =   5340
+      TabIndex        =   18
+      Top             =   840
+      Width           =   1215
+   End
+   Begin VB.TextBox txtDelayMsecs 
+      Height          =   315
+      Left            =   6780
+      TabIndex        =   17
+      Text            =   "0.001"
+      Top             =   840
+      Visible         =   0   'False
+      Width           =   1095
+   End
    Begin VB.TextBox txtPercentFS 
       Height          =   285
       Left            =   240
@@ -37,7 +54,7 @@ Begin VB.Form frmMain
       Left            =   6780
       TabIndex        =   13
       Text            =   "500"
-      Top             =   1080
+      Top             =   1200
       Visible         =   0   'False
       Width           =   1095
    End
@@ -46,7 +63,7 @@ Begin VB.Form frmMain
       Height          =   255
       Left            =   5340
       TabIndex        =   12
-      Top             =   1080
+      Top             =   1200
       Width           =   1215
    End
    Begin VB.TextBox txtResult 
@@ -92,6 +109,14 @@ Begin VB.Form frmMain
       TabIndex        =   1
       Top             =   0
       Width           =   7935
+      Begin VB.CheckBox chkUlErrors 
+         Caption         =   "UL Errors"
+         Height          =   195
+         Left            =   5520
+         TabIndex        =   19
+         Top             =   240
+         Width           =   1035
+      End
       Begin VB.CommandButton cmdFlashLED 
          Caption         =   "FlashLED"
          Height          =   315
@@ -114,7 +139,7 @@ Begin VB.Form frmMain
          Left            =   3420
          TabIndex        =   3
          Top             =   240
-         Width           =   2715
+         Width           =   1755
       End
    End
    Begin VB.Label lblPercentFS 
@@ -172,6 +197,7 @@ Dim mnResolution As Integer, mlIteration As Long
 Dim mnDataValLow As Integer, mnDataValHigh As Integer
 Dim blEvenIteration As Boolean
 Dim msStartTime As Single
+Dim mlErrReporting As Long, mlErrHandling As Long
 
 Private Sub cmbBoard_Click()
 
@@ -185,7 +211,7 @@ Private Sub cmbBoard_Click()
       pID$ = Hex(ConfigVal&)
       Filler& = 4 - Len(pID$)
       If Filler& > 0 Then Prefix$ = String(Filler&, Chr(48))
-      lblBoardNumber.Caption = "Board Number " & _
+      lblBoardNumber.Caption = "Board: " & _
          mlBoardNum & " (type 0x" & Prefix$ & pID$ & ")"
       ValidBoard = CheckForAnalog(mlBoardNum)
    Else
@@ -214,8 +240,8 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
             If Not (frmRemoteNetDlg.txtHostName.Text = "") Then
                HostName = frmRemoteNetDlg.txtHostName.Text
                HostPort& = Val(frmRemoteNetDlg.txtHostPort.Text)
-               Timeout& = Val(frmRemoteNetDlg.txtTimeout.Text)
-               DevsFound& = UpdateDevices(True, HostName, HostPort&, Timeout&)
+               TimeOut& = Val(frmRemoteNetDlg.txtTimeout.Text)
+               DevsFound& = UpdateDevices(True, HostName, HostPort&, TimeOut&)
             End If
             Unload frmRemoteNetDlg
          Else
@@ -230,14 +256,17 @@ End Sub
 
 Private Sub Form_Load()
 
+   mlErrReporting = DONTPRINT
+   mlErrHandling = DONTSTOP
    DevsFound& = UpdateDevices(False)
    ConfigureData
+   chkUlErrors_Click
 
 End Sub
 
 Private Function UpdateDevices(ByVal CheckNet As Boolean, _
    Optional HostString As Variant, Optional HostPort As Long, _
-   Optional Timeout As Long) As Long
+   Optional TimeOut As Long) As Long
 
    Dim devInterface As DaqDeviceInterface
    
@@ -250,7 +279,7 @@ Private Function UpdateDevices(ByVal CheckNet As Boolean, _
    Else
       If HostString = "" Then Exit Function
       DevsFound& = DiscoverDevices(devInterface, _
-         True, HostString, HostPort, Timeout)
+         True, HostString, HostPort, TimeOut)
    End If
 
    cmbBoard.Clear
@@ -272,6 +301,8 @@ Private Sub Form_Resize()
    fraBoard.Left = 0
    fraBoard.Width = Me.Width
    fraBoard.Top = -80
+   cmdFlashLED.Left = Me.Width - 1400
+   chkUlErrors.Left = Me.Width - 2600
    
 End Sub
 
@@ -300,11 +331,34 @@ Private Function CheckForAnalog(ByVal BoardNum As Long) As Boolean
 
 End Function
 
+Private Sub chkUlErrors_Click()
+
+   Dim ulError As Long
+   
+   If chkUlErrors.Value = 1 Then
+      mlErrReporting = PRINTALL
+   Else
+      mlErrReporting = DONTPRINT
+   End If
+   
+   ulError = cbErrHandling(mlErrReporting, mlErrHandling)
+   If ulError <> 0 Then
+      ErrMessage$ = GetULError(ulError)
+      txtResult.Text = ErrMessage$
+   End If
+   
+End Sub
+
 Private Sub cmdStart_Click()
 
    Dim Chan As Long, NumChans As Long
    Dim IntervalValue As Long
+   Dim msecDelay As Single
    
+   msecDelay = 0#
+   If Me.chkUseDelay.Value = 1 Then
+      msecDelay = Val(txtDelayMsecs.Text)
+   End If
    mlFirstChan = Val(txtFirstChan.Text)
    mlLastChan = Val(txtLastChan.Text)
    mlIteration = 0
@@ -339,10 +393,11 @@ Private Sub cmdStart_Click()
          For Chan = mlFirstChan To mlLastChan
             ULStat& = cbAOut(mlBoardNum, Chan, mlRange, mnDataValHigh)
          Next
-         'Do: d& = d& + 1: DoEvents: Loop While d& < 20000
+         Pause msecDelay
          For Chan = mlFirstChan To mlLastChan
             ULStat& = cbAOut(mlBoardNum, Chan, mlRange, mnDataValLow)
          Next
+         Pause msecDelay
       Next
       elapsedTime! = (Timer - StartTime!) / (2 * NumChans)
       Me.cmdStart.Enabled = True
@@ -410,7 +465,18 @@ Private Sub chkTimer_Click()
       txtRateEstimate.Text = "60"
    End If
    txtInterval.Visible = (chkTimer.Value = 1)
+   chkUseDelay.Enabled = (chkTimer.Value = 0)
    
+End Sub
+
+Private Sub chkUseDelay_Click()
+   
+   If chkUseDelay.Value = 1 Then
+      txtRateEstimate.Text = "300"
+   End If
+   txtDelayMsecs.Visible = (chkUseDelay.Value = 1)
+   chkTimer.Enabled = (chkUseDelay.Value = 0)
+
 End Sub
 
 Private Sub txtPercentFS_Change()

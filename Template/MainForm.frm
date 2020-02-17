@@ -4,22 +4,30 @@ Begin VB.Form frmMain
    ClientHeight    =   5340
    ClientLeft      =   60
    ClientTop       =   450
-   ClientWidth     =   7800
+   ClientWidth     =   8310
    KeyPreview      =   -1  'True
    LinkTopic       =   "Form1"
    ScaleHeight     =   5340
-   ScaleWidth      =   7800
+   ScaleWidth      =   8310
    StartUpPosition =   3  'Windows Default
    Begin VB.Frame fraBoard 
       Height          =   615
       Left            =   120
       TabIndex        =   1
-      Top             =   120
-      Width           =   7575
+      Top             =   0
+      Width           =   8115
+      Begin VB.CheckBox chkUlErrors 
+         Caption         =   "UL Errors"
+         Height          =   195
+         Left            =   5760
+         TabIndex        =   5
+         Top             =   240
+         Width           =   1035
+      End
       Begin VB.CommandButton cmdFlashLED 
          Caption         =   "FlashLED"
          Height          =   315
-         Left            =   6360
+         Left            =   6960
          TabIndex        =   4
          Top             =   180
          Width           =   1035
@@ -38,7 +46,7 @@ Begin VB.Form frmMain
          Left            =   3420
          TabIndex        =   3
          Top             =   240
-         Width           =   2715
+         Width           =   2115
       End
    End
    Begin VB.Label lblStatus 
@@ -58,6 +66,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Dim mlBoardNum As Long
+Dim mlErrReporting As Long, mlErrHandling As Long
 
 Private Sub cmbBoard_Click()
 
@@ -68,7 +77,7 @@ Private Sub cmbBoard_Click()
       pID$ = Hex(ConfigVal&)
       Filler& = 4 - Len(pID$)
       If Filler& > 0 Then Prefix$ = String(Filler&, Chr(48))
-      lblBoardNumber.Caption = "Board Number " & _
+      lblBoardNumber.Caption = "Board: " & _
          mlBoardNum & " (type 0x" & Prefix$ & pID$ & ")"
    Else
       lblBoardNumber.Caption = "No Boards Installed"
@@ -95,8 +104,8 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
             If Not (frmRemoteNetDlg.txtHostName.Text = "") Then
                HostName = frmRemoteNetDlg.txtHostName.Text
                HostPort& = Val(frmRemoteNetDlg.txtHostPort.Text)
-               Timeout& = Val(frmRemoteNetDlg.txtTimeout.Text)
-               DevsFound& = UpdateDevices(True, HostName, HostPort&, Timeout&)
+               TimeOut& = Val(frmRemoteNetDlg.txtTimeout.Text)
+               DevsFound& = UpdateDevices(True, HostName, HostPort&, TimeOut&)
             End If
             Unload frmRemoteNetDlg
          Else
@@ -117,7 +126,7 @@ End Sub
 
 Private Function UpdateDevices(ByVal CheckNet As Boolean, _
    Optional HostString As Variant, Optional HostPort As Long, _
-   Optional Timeout As Long) As Long
+   Optional TimeOut As Long) As Long
 
    Dim devInterface As DaqDeviceInterface
    
@@ -130,7 +139,7 @@ Private Function UpdateDevices(ByVal CheckNet As Boolean, _
    Else
       If HostString = "" Then Exit Function
       DevsFound& = DiscoverDevices(devInterface, _
-         True, HostString, HostPort, Timeout)
+         True, HostString, HostPort, TimeOut)
    End If
 
    cmbBoard.Clear
@@ -152,5 +161,26 @@ Private Sub Form_Resize()
    fraBoard.Left = 0
    fraBoard.Width = Me.Width
    fraBoard.Top = -80
+   cmdFlashLED.Left = Me.Width - 1400
+   chkUlErrors.Left = Me.Width - 2600
    
 End Sub
+
+Private Sub chkUlErrors_Click()
+
+   Dim ulError As Long
+   
+   If chkUlErrors.Value = 1 Then
+      mlErrReporting = PRINTALL
+   Else
+      mlErrReporting = DONTPRINT
+   End If
+   
+   ulError = cbErrHandling(mlErrReporting, mlErrHandling)
+   If ulError <> 0 Then
+      ErrMessage$ = GetULError(ulError)
+      txtResult.Text = ErrMessage$
+   End If
+   
+End Sub
+
