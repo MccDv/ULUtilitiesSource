@@ -4,11 +4,11 @@ Begin VB.Form frmMain
    ClientHeight    =   3435
    ClientLeft      =   60
    ClientTop       =   450
-   ClientWidth     =   7800
+   ClientWidth     =   8145
    KeyPreview      =   -1  'True
    LinkTopic       =   "Form1"
    ScaleHeight     =   3435
-   ScaleWidth      =   7800
+   ScaleWidth      =   8145
    StartUpPosition =   2  'CenterScreen
    Begin VB.TextBox txtLastBit 
       Height          =   225
@@ -97,11 +97,19 @@ Begin VB.Form frmMain
       Left            =   120
       TabIndex        =   1
       Top             =   0
-      Width           =   7575
+      Width           =   7995
+      Begin VB.CheckBox chkUlErrors 
+         Caption         =   "UL Errors"
+         Height          =   195
+         Left            =   5580
+         TabIndex        =   20
+         Top             =   240
+         Width           =   1035
+      End
       Begin VB.CommandButton cmdFlashLED 
          Caption         =   "FlashLED"
          Height          =   315
-         Left            =   6360
+         Left            =   6780
          TabIndex        =   4
          Top             =   180
          Width           =   1035
@@ -120,7 +128,7 @@ Begin VB.Form frmMain
          Left            =   3420
          TabIndex        =   3
          Top             =   240
-         Width           =   2715
+         Width           =   2295
       End
    End
    Begin VB.Label lblLastBit 
@@ -194,7 +202,9 @@ Dim mlFirstBit As Long, mlLastBit As Long
 Dim mlNumPorts As Long, mlPortIndex As Long
 Dim mlPortNum As Long, mlNumArrayPorts As Long
 Dim mbDoBits As Boolean, mlTotalBits As Long
-Dim msPortList As String
+Dim msPortList As String, mnResolution As Integer
+Dim mnDataValLow As Integer, mnDataValHigh As Integer
+Dim mlErrReporting As Long, mlErrHandling As Long
 
 Private Sub cmbBoard_Click()
 
@@ -204,11 +214,11 @@ Private Sub cmbBoard_Click()
    If cmbBoard.ListCount > 0 Then
       BoardIndex% = cmbBoard.ListIndex
       mlBoardNum = gnBoardEnum(BoardIndex%)
-      ULStat = cbGetConfig(BOARDINFO, mlBoardNum, 0, BIBOARDTYPE, ConfigVal&)
-      pID$ = Hex(ConfigVal&)
+      ULStat = cbGetConfig(BOARDINFO, mlBoardNum, 0, BIBOARDTYPE, configVal&)
+      pID$ = Hex(configVal&)
       Filler& = 4 - Len(pID$)
       If Filler& > 0 Then Prefix$ = String(Filler&, Chr(48))
-      lblBoardNumber.Caption = "Board Number " & _
+      lblBoardNumber.Caption = "Board: " & _
          mlBoardNum & " (type 0x" & Prefix$ & pID$ & ")"
       AddBoard = CheckForDigital(mlBoardNum)
       lblPortsAvailable.Caption = "Number of ports available: " & mlNumPorts
@@ -245,8 +255,8 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
             If Not (frmRemoteNetDlg.txtHostName.Text = "") Then
                HostName = frmRemoteNetDlg.txtHostName.Text
                HostPort& = Val(frmRemoteNetDlg.txtHostPort.Text)
-               Timeout& = Val(frmRemoteNetDlg.txtTimeout.Text)
-               DevsFound& = UpdateDevices(True, HostName, HostPort&, Timeout&)
+               TimeOut& = Val(frmRemoteNetDlg.txtTimeout.Text)
+               DevsFound& = UpdateDevices(True, HostName, HostPort&, TimeOut&)
             End If
             Unload frmRemoteNetDlg
          Else
@@ -261,19 +271,24 @@ End Sub
 
 Private Sub Form_Load()
 
-   ULStat& = cbErrHandling(DONTPRINT, DONTSTOP)
+   mlErrReporting = DONTPRINT
+   mlErrHandling = DONTSTOP
    DevsFound& = UpdateDevices(False)
    If Not DevsFound& = 0 Then
       mlPortIndex = 0
       GetPortType
       cmdStart.Enabled = True
    End If
+   If CheckForDigital(mlBoardNum) Then
+      ConfigureData
+   End If
+   chkUlErrors_Click
 
 End Sub
 
 Private Function UpdateDevices(ByVal CheckNet As Boolean, _
    Optional HostString As Variant, Optional HostPort As Long, _
-   Optional Timeout As Long) As Long
+   Optional TimeOut As Long) As Long
 
    Dim devInterface As DaqDeviceInterface
    
@@ -285,7 +300,7 @@ Private Function UpdateDevices(ByVal CheckNet As Boolean, _
       DevsFound& = DiscoverDevices(devInterface, True)
    Else
       DevsFound& = DiscoverDevices(devInterface, _
-         True, HostString, HostPort, Timeout)
+         True, HostString, HostPort, TimeOut)
    End If
 
    cmbBoard.Clear
@@ -314,28 +329,47 @@ Private Sub Form_Resize()
    fraBoard.Left = 0
    fraBoard.Width = Me.Width
    fraBoard.Top = -80
+   cmdFlashLED.Left = Me.Width - 1400
+   chkUlErrors.Left = Me.Width - 2600
+   
+End Sub
+
+Private Sub chkUlErrors_Click()
+
+   Dim ulError As Long
+   
+   If chkUlErrors.Value = 1 Then
+      mlErrReporting = PRINTALL
+   Else
+      mlErrReporting = DONTPRINT
+   End If
+   
+   ulError = cbErrHandling(mlErrReporting, mlErrHandling)
+   If ulError <> 0 Then
+      ErrMessage$ = GetULError(ulError)
+      txtResult.Text = ErrMessage$
+   End If
    
 End Sub
 
 Private Sub cmdStart_Click()
 
    Dim NumBits As Long
+   Dim spanPorts As Boolean
    
+   mlFirstBit = Val(txtFirstBit.Text)
+   mlLastBit = Val(txtLastBit.Text)
+   GetPortType
+   spanPorts = (chkArray.Value = 1)
    NumBits = (mlLastBit - mlFirstBit) + 1
    Me.cmdStart.Enabled = False
    txtResult.Text = ""
    Iterations& = Val(txtRateEstimate.Text)
    
-   If Me.chkArray.Value = 1 Then
-      ReDim OutArrayLow(mlNumArrayPorts - 1) As Long
-      ReDim OutArrayHigh(mlNumArrayPorts - 1) As Long
-      For arrayElement& = 0 To mlNumArrayPorts - 1
-         OutArrayLow(arrayElement&) = 0
-         OutArrayHigh(arrayElement&) = (2 ^ mlNumBits) - 1
-      Next
-      LastArrayPort& = mlPortNum + (mlNumArrayPorts - 1)
-      ULStat& = cbDOutArray(mlBoardNum, mlPortNum, _
-         LastArrayPort&, OutArrayLow(0))
+   If mbDoBits Then
+      BitPort& = FIRSTPORTA
+      If mlPortNum < 10 Then BitPort& = AUXPORT
+      ULStat& = cbDBitOut(mlBoardNum, BitPort&, mlFirstBit, mnDataValLow)
       If ULStat& <> 0 Then
          ErrMessage$ = GetULError(ULStat&)
          txtResult.Text = ErrMessage$
@@ -343,17 +377,25 @@ Private Sub cmdStart_Click()
       End If
       StartTime! = Timer
       For i& = 0 To Iterations&
-         ULStat& = cbDOutArray(mlBoardNum, mlPortNum, _
-            LastArrayPort&, OutArrayHigh(0))
+         For CurBit& = mlFirstBit To mlLastBit
+            ULStat& = cbDBitOut(mlBoardNum, BitPort&, CurBit&, 1)
+         Next
+         For CurBit& = mlFirstBit To mlLastBit
+            ULStat& = cbDBitOut(mlBoardNum, BitPort&, CurBit&, 0)
+         Next
+      Next
+      elapsedTime! = (Timer - StartTime!) / (NumBits * 2)
+   Else
+      If spanPorts Then
+         ReDim OutArrayLow(mlNumArrayPorts - 1) As Long
+         ReDim OutArrayHigh(mlNumArrayPorts - 1) As Long
+         For arrayElement& = 0 To mlNumArrayPorts - 1
+            OutArrayLow(arrayElement&) = mnDataValLow
+            OutArrayHigh(arrayElement&) = mnDataValHigh
+         Next
+         LastArrayPort& = mlPortNum + (mlNumArrayPorts - 1)
          ULStat& = cbDOutArray(mlBoardNum, mlPortNum, _
             LastArrayPort&, OutArrayLow(0))
-      Next
-      elapsedTime! = (Timer - StartTime!) / 2
-   Else
-      If mbDoBits Then
-         BitPort& = FIRSTPORTA
-         If mlPortNum < 10 Then BitPort& = AUXPORT
-         ULStat& = cbDBitOut(mlBoardNum, BitPort&, mlFirstBit, 0)
          If ULStat& <> 0 Then
             ErrMessage$ = GetULError(ULStat&)
             txtResult.Text = ErrMessage$
@@ -361,16 +403,14 @@ Private Sub cmdStart_Click()
          End If
          StartTime! = Timer
          For i& = 0 To Iterations&
-            For CurBit& = mlFirstBit To mlLastBit
-               ULStat& = cbDBitOut(mlBoardNum, BitPort&, CurBit&, 1)
-            Next
-            For CurBit& = mlFirstBit To mlLastBit
-               ULStat& = cbDBitOut(mlBoardNum, BitPort&, CurBit&, 0)
-            Next
+            ULStat& = cbDOutArray(mlBoardNum, mlPortNum, _
+               LastArrayPort&, OutArrayHigh(0))
+            ULStat& = cbDOutArray(mlBoardNum, mlPortNum, _
+               LastArrayPort&, OutArrayLow(0))
          Next
-         elapsedTime! = (Timer - StartTime!) / (NumBits * 2)
+         elapsedTime! = (Timer - StartTime!) / 2
       Else
-         ULStat& = cbDOut(mlBoardNum, mlPortNum, 0)
+         ULStat& = cbDOut(mlBoardNum, mlPortNum, mnDataValLow)
          If ULStat& <> 0 Then
             ErrMessage$ = GetULError(ULStat&)
             txtResult.Text = ErrMessage$
@@ -378,8 +418,8 @@ Private Sub cmdStart_Click()
          End If
          StartTime! = Timer
          For i& = 0 To Iterations&
-            ULStat& = cbDOut(mlBoardNum, mlPortNum, 255)
-            ULStat& = cbDOut(mlBoardNum, mlPortNum, 0)
+            ULStat& = cbDOut(mlBoardNum, mlPortNum, mnDataValHigh)
+            ULStat& = cbDOut(mlBoardNum, mlPortNum, mnDataValLow)
          Next
          elapsedTime! = (Timer - StartTime!) / 2
       End If
@@ -407,8 +447,8 @@ Private Sub GetPortType()
    If ArrayEnabled Then
       mlTotalBits = 0
       ULStat& = cbGetConfig(BOARDINFO, mlBoardNum, _
-         0, BIDINUMDEVS, ConfigVal&)
-      For DevNum& = mlPortIndex To ConfigVal& - 1
+         0, BIDINUMDEVS, configVal&)
+      For DevNum& = mlPortIndex To configVal& - 1
          ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
             DevNum&, DIDEVTYPE, DevType&)
          ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
@@ -538,4 +578,15 @@ Private Sub ConfigureOutputs(SetOutputs As Boolean)
       ULStat& = cbDConfigPort(mlBoardNum, PortNum, Direction)
    Next
    
+End Sub
+
+Private Sub ConfigureData()
+
+   Dim FS As Long, HS As Long
+   
+   FS = 2 ^ mnResolution
+   HS = FS / 2
+   mnDataValHigh = ULongValToInt(HS + (HS) - 1)
+   mnDataValLow = ULongValToInt(HS - (HS))
+
 End Sub
