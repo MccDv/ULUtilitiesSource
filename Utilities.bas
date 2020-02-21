@@ -3,15 +3,15 @@ Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 
 Public Sub Pause(mSecsDelay As Single)
    
-   Dim TimeOut   As Single
+   Dim Timeout   As Single
    Dim PrevTimer As Single
    
    PrevTimer = Timer
-   TimeOut = PrevTimer + mSecsDelay
-   Do While PrevTimer < TimeOut
+   Timeout = PrevTimer + mSecsDelay
+   Do While PrevTimer < Timeout
       Sleep 4 '-- Timer is only updated every 1/64 sec = 15.625 millisecs.
       DoEvents
-      If Timer < PrevTimer Then TimeOut = TimeOut - 86400 '-- pass midnight
+      If Timer < PrevTimer Then Timeout = Timeout - 86400 '-- pass midnight
       PrevTimer = Timer
    Loop
 
@@ -123,18 +123,5 @@ Function GetBitOffset(BoardNum As Long, PortIndex As Long) As Long
    Next
    GetBitOffset = Offset
    
-End Function
-
-Function ULongValToInt(LongVal As Long) As Integer
-
-   Select Case LongVal
-      Case Is > 65535
-         ULongValToInt = -1
-      Case Is < 0
-         ULongValToInt = 0
-      Case Else
-         ULongValToInt = (LongVal - 32768) Xor &H8000
-   End Select
-
 End Function
 
