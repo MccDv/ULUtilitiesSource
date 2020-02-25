@@ -10,6 +10,47 @@ Begin VB.Form frmMain
    ScaleHeight     =   5340
    ScaleWidth      =   8310
    StartUpPosition =   2  'CenterScreen
+   Begin VB.Timer tmrRateDecrementer 
+      Enabled         =   0   'False
+      Interval        =   300
+      Left            =   3780
+      Top             =   1680
+   End
+   Begin VB.TextBox txtRate 
+      Height          =   315
+      Left            =   1920
+      TabIndex        =   22
+      Text            =   "10000000"
+      Top             =   3420
+      Width           =   1155
+   End
+   Begin VB.Frame fraTestType 
+      Caption         =   "Select Test"
+      Height          =   915
+      Left            =   5580
+      TabIndex        =   19
+      Top             =   720
+      Width           =   2595
+      Begin VB.OptionButton optTestSelected 
+         Caption         =   "Source rate evaluation"
+         Height          =   195
+         Index           =   1
+         Left            =   180
+         TabIndex        =   21
+         Top             =   600
+         Width           =   1935
+      End
+      Begin VB.OptionButton optTestSelected 
+         Caption         =   "Max rate evaluation"
+         Height          =   195
+         Index           =   0
+         Left            =   180
+         TabIndex        =   20
+         Top             =   300
+         Value           =   -1  'True
+         Width           =   1935
+      End
+   End
    Begin VB.TextBox txtPortIndex 
       Height          =   285
       Left            =   180
@@ -29,15 +70,15 @@ Begin VB.Form frmMain
    Begin VB.Timer tmrRateGenerator 
       Enabled         =   0   'False
       Interval        =   1000
-      Left            =   5880
-      Top             =   960
+      Left            =   4740
+      Top             =   1680
    End
    Begin VB.CommandButton cmdStart 
       Caption         =   "Start"
       Height          =   375
       Left            =   240
       TabIndex        =   12
-      Top             =   2940
+      Top             =   3360
       Width           =   915
    End
    Begin VB.Frame fraScanType 
@@ -132,6 +173,22 @@ Begin VB.Form frmMain
          Width           =   2115
       End
    End
+   Begin VB.Label lblSourceRate 
+      ForeColor       =   &H00FF0000&
+      Height          =   195
+      Left            =   5460
+      TabIndex        =   24
+      Top             =   3480
+      Width           =   2460
+   End
+   Begin VB.Label lblActualRate 
+      ForeColor       =   &H00FF0000&
+      Height          =   195
+      Left            =   3360
+      TabIndex        =   23
+      Top             =   3480
+      Width           =   1395
+   End
    Begin VB.Label lblPortIndex 
       Caption         =   "Port Index"
       Height          =   195
@@ -194,6 +251,7 @@ Dim mlTestRate As Long, mlRate As Long
 Dim mlFailRate As Long, mlPassRate As Long
 Dim mlPortNum As Long, mlPortIndex As Long, msPortList As String
 Dim mlNumArrayPorts As Long, mlNumPorts As Long
+Dim mbManualRate As Boolean
 
 Private Sub cmbBoard_Click()
 
@@ -402,11 +460,30 @@ Private Sub cmdStart_Click()
    If mlMemHandle = 0 Then
       Exit Sub
    End If
-   mlRate = 10000000
-   mlTestRate = mlRate / 2
-   mlPassRate = 0
-   tmrRateGenerator.Interval = 300
-   tmrRateGenerator.Enabled = True
+   If optTestSelected(0).Value Then
+      If Not mbManualRate Then txtRate.Text = 10000000
+      mlRate = Val(txtRate.Text)
+      lblActualRate.Caption = ""
+      mlTestRate = mlRate / 2
+      mlPassRate = 0
+      txtRate.Enabled = False
+      tmrRateGenerator.Interval = 300
+      tmrRateGenerator.Enabled = True
+   Else
+      If (lblSourceRate = "") Then
+         mlRate = Val(txtRate.Text)
+      Else
+         mlRate = Val(lblCurRate.Caption)
+      End If
+      If Not (lblActualRate.Caption = "") Then
+         mlTestRate = Val(lblActualRate.Caption)
+      Else
+         mlTestRate = mlRate
+      End If
+      lblActualRate.Caption = ""
+      lblSourceRate = "*"
+      tmrRateDecrementer.Enabled = True
+   End If
    
 End Sub
 
@@ -474,6 +551,42 @@ Function RunScan() As Long
    
 End Function
 
+Private Sub tmrRateDecrementer_Timer()
+
+   Dim ULStat As Long, ActualRate As Long
+   Dim sourceRate As Long, Divisor As Long
+   Dim actPer As Single, reqPer As Single
+   Dim suffix As String
+   
+   mlRate = mlRate - (mlRate * 0.0005)
+   ULStat = RunScan()
+   If Not ULStat = 0 Then
+      tmrRateDecrementer.Enabled = False
+      Exit Sub
+   End If
+   lblSourceRate.Caption = lblSourceRate.Caption & "*"
+   ActualRate = Val(lblCurRate.Caption)
+   If ActualRate < mlTestRate Then
+      tmrRateDecrementer.Enabled = False
+      reqPer = 1 / mlTestRate
+      actPer = 1 / ActualRate
+      sourceRate = 1 / (actPer - reqPer)
+      Select Case sourceRate
+         Case Is < 1000
+            Divisor = 1
+            suffix = " Hz"
+         Case Is < 1000000
+            Divisor = 1000
+            suffix = " kHz"
+         Case Else
+            Divisor = 1000000
+            suffix = " MHz"
+      End Select
+      lblSourceRate.Caption = Format(sourceRate / Divisor, "0.00") & suffix
+   End If
+   
+End Sub
+
 Private Sub tmrRateGenerator_Timer()
 
    Dim ULStat As Long, rateIncrement As Long
@@ -495,6 +608,10 @@ Private Sub tmrRateGenerator_Timer()
          tmrRateGenerator.Enabled = False
          finalRate = lblCurRate.Caption
          lblCurRate.Caption = "Max request: " & mlRate & "  Actual rate: " & finalRate
+         txtRate.Text = mlRate
+         txtRate.Enabled = True
+         lblActualRate.Caption = finalRate
+         mbManualRate = False
          Exit Sub
       End If
       mlPassRate = mlRate
@@ -599,3 +716,10 @@ Private Sub ConfigureData()
 
 End Sub
 
+Private Sub txtRate_KeyPress(KeyAscii As Integer)
+
+   If KeyAscii = vbKeyReturn Then
+      mbManualRate = True
+   End If
+   
+End Sub
