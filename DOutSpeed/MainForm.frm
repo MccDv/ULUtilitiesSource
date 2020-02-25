@@ -214,8 +214,8 @@ Private Sub cmbBoard_Click()
    If cmbBoard.ListCount > 0 Then
       BoardIndex% = cmbBoard.ListIndex
       mlBoardNum = gnBoardEnum(BoardIndex%)
-      ULStat = cbGetConfig(BOARDINFO, mlBoardNum, 0, BIBOARDTYPE, configVal&)
-      pID$ = Hex(configVal&)
+      ULStat = cbGetConfig(BOARDINFO, mlBoardNum, 0, BIBOARDTYPE, ConfigVal&)
+      pID$ = Hex(ConfigVal&)
       Filler& = 4 - Len(pID$)
       If Filler& > 0 Then Prefix$ = String(Filler&, Chr(48))
       lblBoardNumber.Caption = "Board: " & _
@@ -255,8 +255,8 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
             If Not (frmRemoteNetDlg.txtHostName.Text = "") Then
                HostName = frmRemoteNetDlg.txtHostName.Text
                HostPort& = Val(frmRemoteNetDlg.txtHostPort.Text)
-               TimeOut& = Val(frmRemoteNetDlg.txtTimeout.Text)
-               DevsFound& = UpdateDevices(True, HostName, HostPort&, TimeOut&)
+               Timeout& = Val(frmRemoteNetDlg.txtTimeout.Text)
+               DevsFound& = UpdateDevices(True, HostName, HostPort&, Timeout&)
             End If
             Unload frmRemoteNetDlg
          Else
@@ -271,6 +271,7 @@ End Sub
 
 Private Sub Form_Load()
 
+   Me.Caption = App.EXEName & " Test Application"
    mlErrReporting = DONTPRINT
    mlErrHandling = DONTSTOP
    DevsFound& = UpdateDevices(False)
@@ -288,7 +289,7 @@ End Sub
 
 Private Function UpdateDevices(ByVal CheckNet As Boolean, _
    Optional HostString As Variant, Optional HostPort As Long, _
-   Optional TimeOut As Long) As Long
+   Optional Timeout As Long) As Long
 
    Dim devInterface As DaqDeviceInterface
    
@@ -299,8 +300,9 @@ Private Function UpdateDevices(ByVal CheckNet As Boolean, _
    If IsMissing(HostString) Then
       DevsFound& = DiscoverDevices(devInterface, True)
    Else
+      If HostString = "" Then Exit Function
       DevsFound& = DiscoverDevices(devInterface, _
-         True, HostString, HostPort, TimeOut)
+         True, HostString, HostPort, Timeout)
    End If
 
    cmbBoard.Clear
@@ -427,12 +429,12 @@ Private Sub cmdStart_Click()
    Me.cmdStart.Enabled = True
    outputRate! = 1 / (elapsedTime! / Iterations&)
    FormatString$ = "0.00 Hz"
-   divisor! = 1#
+   Divisor! = 1#
    If outputRate! > 999 Then
       FormatString$ = "0.00 kHz"
-      divisor! = 1000#
+      Divisor! = 1000#
    End If
-   txtResult.Text = "Update rate: " & Format(outputRate! / divisor!, FormatString$)
+   txtResult.Text = "Update rate: " & Format(outputRate! / Divisor!, FormatString$)
    
 End Sub
 
@@ -447,8 +449,8 @@ Private Sub GetPortType()
    If ArrayEnabled Then
       mlTotalBits = 0
       ULStat& = cbGetConfig(BOARDINFO, mlBoardNum, _
-         0, BIDINUMDEVS, configVal&)
-      For DevNum& = mlPortIndex To configVal& - 1
+         0, BIDINUMDEVS, ConfigVal&)
+      For DevNum& = mlPortIndex To ConfigVal& - 1
          ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _
             DevNum&, DIDEVTYPE, DevType&)
          ULStat& = cbGetConfig(DIGITALINFO, mlBoardNum, _

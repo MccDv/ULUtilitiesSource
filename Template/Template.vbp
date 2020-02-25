@@ -1,13 +1,13 @@
 Type=Exe
 Form=MainForm.frm
 Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#..\..\..\..\..\..\Windows\system32\stdole2.tlb#OLE Automation
-Module=TemplateDefs; TemplateDefs.bas
-Form=frmRemoteNetDlg.frm
 Module=CBW; ..\..\DAQ\VBWIN\CBW.BAS
 Module=ULDiscovery; ..\ULDiscovery.bas
 Module=LibStrings; ..\LibStrings.bas
 Module=Utility; ..\Utilities.bas
 Module=SYSINF32; ..\Versinf32.bas
+Form=..\frmRemoteNetDlg.frm
+Module=TemplateDefs; ..\TemplateDefs.bas
 IconForm="frmMain"
 Startup="frmMain"
 ExeName32="Template.exe"

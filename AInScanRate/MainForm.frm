@@ -248,11 +248,11 @@ Begin VB.Form frmMain
       Left            =   120
       TabIndex        =   1
       Top             =   0
-      Width           =   7575
+      Width           =   9495
       Begin VB.CommandButton cmdFlashLED 
          Caption         =   "FlashLED"
          Height          =   315
-         Left            =   6360
+         Left            =   8340
          TabIndex        =   4
          Top             =   180
          Width           =   1035
@@ -637,6 +637,7 @@ Private Sub Form_Load()
    
    ' declare revision level of Universal Library
 
+   Me.Caption = App.EXEName & " Test Application"
    ULStat = cbDeclareRevision(CURRENTREVNUM)
 
    ReportError = DONTPRINT
@@ -686,6 +687,8 @@ Private Sub Form_Resize()
    fraBoard.Left = 0
    fraBoard.Width = Me.Width
    fraBoard.Top = -80
+   cmdFlashLED.Left = Me.Width - 1400
+   'chkUlErrors.Left = Me.Width - 2600
    
 End Sub
 

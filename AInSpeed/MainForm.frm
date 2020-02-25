@@ -208,6 +208,7 @@ End Sub
 
 Private Sub Form_Load()
 
+   Me.Caption = App.EXEName & " Test Application"
    mlErrReporting = DONTPRINT
    mlErrHandling = DONTSTOP
    DevsFound& = UpdateDevices(False)

@@ -9,7 +9,7 @@ Begin VB.Form frmMain
    LinkTopic       =   "Form1"
    ScaleHeight     =   5340
    ScaleWidth      =   7800
-   StartUpPosition =   3  'Windows Default
+   StartUpPosition =   2  'CenterScreen
    Begin VB.ComboBox cmbOption 
       Height          =   315
       ItemData        =   "MainForm.frx":0000
@@ -183,6 +183,7 @@ End Sub
 
 Private Sub Form_Load()
 
+   Me.Caption = App.EXEName & " Test Application"
    DevsFound& = UpdateDevices(False)
    Me.cmbOption.ListIndex = 0
 

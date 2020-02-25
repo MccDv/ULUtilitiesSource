@@ -240,8 +240,8 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
             If Not (frmRemoteNetDlg.txtHostName.Text = "") Then
                HostName = frmRemoteNetDlg.txtHostName.Text
                HostPort& = Val(frmRemoteNetDlg.txtHostPort.Text)
-               TimeOut& = Val(frmRemoteNetDlg.txtTimeout.Text)
-               DevsFound& = UpdateDevices(True, HostName, HostPort&, TimeOut&)
+               Timeout& = Val(frmRemoteNetDlg.txtTimeout.Text)
+               DevsFound& = UpdateDevices(True, HostName, HostPort&, Timeout&)
             End If
             Unload frmRemoteNetDlg
          Else
@@ -256,6 +256,7 @@ End Sub
 
 Private Sub Form_Load()
 
+   Me.Caption = App.EXEName & " Test Application"
    mlErrReporting = DONTPRINT
    mlErrHandling = DONTSTOP
    DevsFound& = UpdateDevices(False)
@@ -266,7 +267,7 @@ End Sub
 
 Private Function UpdateDevices(ByVal CheckNet As Boolean, _
    Optional HostString As Variant, Optional HostPort As Long, _
-   Optional TimeOut As Long) As Long
+   Optional Timeout As Long) As Long
 
    Dim devInterface As DaqDeviceInterface
    
@@ -279,7 +280,7 @@ Private Function UpdateDevices(ByVal CheckNet As Boolean, _
    Else
       If HostString = "" Then Exit Function
       DevsFound& = DiscoverDevices(devInterface, _
-         True, HostString, HostPort, TimeOut)
+         True, HostString, HostPort, Timeout)
    End If
 
    cmbBoard.Clear
@@ -403,12 +404,12 @@ Private Sub cmdStart_Click()
       Me.cmdStart.Enabled = True
       outputRate! = 1 / (elapsedTime! / Iterations&)
       FormatString$ = "0.00 Hz"
-      divisor! = 1#
+      Divisor! = 1#
       If outputRate! > 999 Then
          FormatString$ = "0.00 kHz"
-         divisor! = 1000#
+         Divisor! = 1000#
       End If
-      txtResult.Text = "Update rate: " & Format(outputRate! / divisor!, FormatString$)
+      txtResult.Text = "Update rate: " & Format(outputRate! / Divisor!, FormatString$)
    End If
    
 End Sub
@@ -449,12 +450,12 @@ Private Sub tmrAOut_Timer()
       cmdStart.Enabled = True
       outputRate! = 1 / (elapsedTime! / endIteration)
       FormatString$ = "0.00 Hz"
-      divisor! = 1#
+      Divisor! = 1#
       If outputRate! > 999 Then
          FormatString$ = "0.00 kHz"
-         divisor! = 1000#
+         Divisor! = 1000#
       End If
-      txtResult.Text = "Update rate: " & Format(outputRate! / divisor!, FormatString$)
+      txtResult.Text = "Update rate: " & Format(outputRate! / Divisor!, FormatString$)
    End If
 
 End Sub

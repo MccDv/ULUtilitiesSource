@@ -33,7 +33,6 @@ Begin VB.Form frmRemoteNetDlg
       Height          =   285
       Left            =   240
       TabIndex        =   2
-      Text            =   "173.76.198.250"
       Top             =   180
       Width           =   2655
    End
@@ -102,6 +101,19 @@ Private Sub cmdOK_Click()
    haveParams = (Len(txtHostName.Text) > 3) _
       And (Len(txtHostPort.Text) > 3) _
       And (Len(txtTimeout.Text) > 0)
+   Me.Hide
+
+End Sub
+
+Private Sub Form_Activate()
+   
+   txtHostName.Text = "173.76.198.250"
+
+End Sub
+
+Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
+
+   txtHostName.Text = ""
    Me.Hide
 
 End Sub
