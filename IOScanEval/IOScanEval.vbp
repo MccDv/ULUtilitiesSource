@@ -11,6 +11,7 @@ Module=TemplateDefs; ..\TemplateDefs.bas
 Module=AnalogIO; ..\..\DAQ\VBWIN\Sample32\Analog.bas
 Module=Counters; ..\..\DAQ\VBWIN\Sample32\Counters.bas
 Module=DigitalIO; ..\..\DAQ\VBWIN\Sample32\Digital.bas
+Module=MATH; ..\MATH.BAS
 IconForm="frmMain"
 Startup="frmMain"
 ExeName32="IOScanEval.exe"
