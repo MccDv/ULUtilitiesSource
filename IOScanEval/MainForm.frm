@@ -246,7 +246,7 @@ Dim mlErrReporting As Long, mlErrHandling As Long
 Dim mlDataBuffer() As Integer
 Dim mlDataBuffer32() As Long
 Dim mlMemHandle As Long, mlADRange As Long, mlDARange As Long
-Dim mlNumSamples As Long
+Dim mlNumSamples As Long, mlOptions As Long
 Dim mlTestRate As Long, mlRate As Long
 Dim mlFailRate As Long, mlPassRate As Long
 Dim mlPortNum As Long, mlPortIndex As Long, msPortList As String
@@ -268,6 +268,7 @@ Private Sub cmbBoard_Click()
       lblBoardNumber.Caption = "No Boards Installed"
    End If
    CheckDeviceSubsystems
+   optTestSelected(0).Value = True
    
 End Sub
 
@@ -309,6 +310,7 @@ Private Sub Form_Load()
    Me.Caption = App.EXEName & " Test Application"
    DevsFound& = UpdateDevices(False)
    CheckDeviceSubsystems
+   mlOptions = BACKGROUND
 
 End Sub
 
@@ -470,10 +472,10 @@ Private Sub cmdStart_Click()
       tmrRateGenerator.Interval = 300
       tmrRateGenerator.Enabled = True
    Else
-      If (lblSourceRate = "") Then
-         mlRate = Val(txtRate.Text)
+      If (mlPassRate > 0) And (Not mbManualRate) Then
+         mlRate = mlPassRate
       Else
-         mlRate = Val(lblCurRate.Caption)
+         mlRate = Val(txtRate.Text)
       End If
       If Not (lblActualRate.Caption = "") Then
          mlTestRate = Val(lblActualRate.Caption)
@@ -515,13 +517,15 @@ Private Sub optScanType_Click(Index As Integer)
    lblPortsAvailable.Visible = showDigital
    chkArray.Visible = showDigital
    lblPortType.Visible = showDigital
+   optTestSelected(0).Value = True
    
 End Sub
 
 Function RunScan() As Long
 
-   Dim ULStat As Long
-   Dim curRate As Long
+   Dim ULStat As Long, ulErr As Long
+   Dim curRate As Long, curCount As Long
+   Dim curIndex As Long, status As Integer
    
    curRate = mlRate
    Select Case mlFuncType
@@ -546,6 +550,29 @@ Function RunScan() As Long
          Exit Function
       End If
    End If
+   ulErr = cbGetStatus(mlBoardNum, status, curCount, curIndex, mlFuncType)
+   If Not ulErr = 0 Then
+      tmrRateGenerator.Enabled = False
+      ErrMessage$ = GetULError(ULStat)
+      lblStatus.Caption = ErrMessage$
+      lblStatus.ForeColor = &HFF
+      lblCurRate.Caption = "Error"
+      Exit Function
+   End If
+   DoEvents
+   Do While status = RUNNING
+      ulErr = cbGetStatus(mlBoardNum, status, curCount, curIndex, mlFuncType)
+      If Not ulErr = 0 Then
+         tmrRateGenerator.Enabled = False
+         ErrMessage$ = GetULError(ULStat)
+         lblStatus.Caption = ErrMessage$
+         lblStatus.ForeColor = &HFF
+         lblCurRate.Caption = "Error"
+         ulErr = cbStopBackground(mlBoardNum, mlFuncType)
+         Exit Function
+      End If
+   Loop
+   ulErr = cbStopBackground(mlBoardNum, mlFuncType)
    lblCurRate.Caption = curRate
    RunScan = ULStat
    
@@ -556,7 +583,7 @@ Private Sub tmrRateDecrementer_Timer()
    Dim ULStat As Long, ActualRate As Long
    Dim sourceRate As Long, Divisor As Long
    Dim actPer As Single, reqPer As Single
-   Dim suffix As String
+   Dim suffix As String, lblCap As String
    
    mlRate = mlRate - (mlRate * 0.0005)
    ULStat = RunScan()
@@ -564,25 +591,36 @@ Private Sub tmrRateDecrementer_Timer()
       tmrRateDecrementer.Enabled = False
       Exit Sub
    End If
-   lblSourceRate.Caption = lblSourceRate.Caption & "*"
+   lblCap = lblSourceRate.Caption
+   If Len(lblCap) > 8 Then lblCap = ""
+   DoEvents
+   lblSourceRate.Caption = lblCap & "*"
+   
    ActualRate = Val(lblCurRate.Caption)
-   If ActualRate < mlTestRate Then
-      tmrRateDecrementer.Enabled = False
-      reqPer = 1 / mlTestRate
-      actPer = 1 / ActualRate
-      sourceRate = 1 / (actPer - reqPer)
-      Select Case sourceRate
-         Case Is < 1000
-            Divisor = 1
-            suffix = " Hz"
-         Case Is < 1000000
-            Divisor = 1000
-            suffix = " kHz"
-         Case Else
-            Divisor = 1000000
-            suffix = " MHz"
-      End Select
-      lblSourceRate.Caption = Format(sourceRate / Divisor, "0.00") & suffix
+   If ActualRate > 0 Then
+      If ActualRate < mlTestRate Then
+         tmrRateDecrementer.Enabled = False
+         reqPer = 1 / mlTestRate
+         actPer = 1 / ActualRate
+         sourceRate = 1 / (actPer - reqPer)
+         Select Case sourceRate
+            Case Is < 1000
+               Divisor = 1
+               suffix = " Hz"
+            Case Is < 1000000
+               Divisor = 1000
+               suffix = " kHz"
+            Case Else
+               Divisor = 1000000
+               suffix = " MHz"
+         End Select
+         lblSourceRate.Caption = Format(sourceRate / Divisor, "0.00") & suffix
+      End If
+   Else
+      Me.tmrRateDecrementer.Enabled = False
+      Me.lblStatus.Caption = "Zero rate returned"
+      Me.lblStatus.ForeColor = &HFF
+      Exit Sub
    End If
    
 End Sub
