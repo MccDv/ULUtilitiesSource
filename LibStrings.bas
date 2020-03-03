@@ -927,7 +927,7 @@ Function GetOptionsString(OptionVal As Long, FormType As Integer, Optional FormF
             "SCALEDATA", "SINGLEIO", "DMAIO", "BLOCKIO", "WORDXFER", "SIMULTANEOUS")
          End If
          If Not IsNull(opt) Then
-            If FormType = Counter Then
+            If FormType = COUNTERS Then
                If opt = "WORDXFER" Then opt = "CTR32BIT"
                If opt = "NOFILTER" Then opt = "CTR64BIT"
                If opt = "SIMULTANEOUS" Then opt = "CTR48BIT"
@@ -948,7 +948,7 @@ Function GetOptionsString(OptionVal As Long, FormType As Integer, Optional FormF
          "WAITFORNEWDATA", "EXTTRIGGER", "NOCALIBRATEDATA", "BURSTIO", "RETRIGMODE", _
          "NONSTREAMEDIO", "ADCCLOCKTRIG", "ADCCLOCK", "HIGHRESRATE", "SHUNTCAL")
          If Not IsNull(opt) Then
-            If FormType = Counter Then
+            If FormType = COUNTERS Then
                If opt = "NOFILTER" Then opt = "CTR64BIT"
                If opt = "EXTMEMORY" Then opt = "NOCLEAR"
             Else 'If Not (FormType = ANALOG_IO) Then
